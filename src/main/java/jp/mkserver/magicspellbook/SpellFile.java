@@ -96,7 +96,6 @@ public class SpellFile {
             }
         }
         Collections.shuffle(resultRole);
-        MagicSpellBook.plugin.getLogger().info("SpellFileDebug: ["+debug+"|"+resultRole.size()+"]");
         return resultRole.get(0);
     }
 

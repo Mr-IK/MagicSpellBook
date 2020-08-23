@@ -28,8 +28,12 @@ public class MagicStatus {
         return uuid;
     }
 
-    public void inputItem(ItemStack item){
+    public void inputItem(ItemStack item) {
         inputedItem.add(item);
+    }
+
+    public void resetInputItem(){
+        inputedItem.clear();
     }
 
     public void releaseItem(){

@@ -31,8 +31,8 @@ public class MSPCommand implements CommandExecutor {
             p.sendMessage(prefix+"§a/msp reqexp [数字] : 必要経験値レベル(消費なし)を設定します takeと同じかそれ以上限定です。");
             p.sendMessage(prefix+"§a/msp addresult [数字] : 錬成結果に入るアイテムを手にもって実行すると結果に入ります。数字を大きくすると確率が上がります");
             p.sendMessage(prefix+"§a/msp reqItem : 素材とするアイテムを手にもって実行すると必要素材に入ります。");
-            p.sendMessage(prefix+"§a/msp create "+args[1]+" : 作成を確定し、データを保存します。失敗時はクリアされます。");
-            p.sendMessage(prefix+"§c/msp clear : 作成モードを離れます。データは破棄されます。");
+            p.sendMessage(prefix+"§a/msp create [name] : 作成を確定し、データを保存します。失敗時はクリアされます。");
+            p.sendMessage(prefix+"§c/msp cancel : 作成モードを離れます。データは破棄されます。");
             return true;
         }else if(args.length==1){
             String a = args[0];
@@ -66,6 +66,7 @@ public class MSPCommand implements CommandExecutor {
                     lore = new ArrayList<>();
                 }
                 lore.add("§kMSP:"+a);
+                meta.setLore(lore);
                 item.setItemMeta(meta);
                 p.getInventory().setItemInMainHand(item);
                 p.sendMessage(prefix+"§aloreのセットが完了しました。");
@@ -101,7 +102,7 @@ public class MSPCommand implements CommandExecutor {
                 p.sendMessage(prefix+"§a/msp addresult [数字] : 錬成結果に入るアイテムを手にもって実行すると結果に入ります。数字を大きくすると確率が上がります");
                 p.sendMessage(prefix+"§a/msp reqItem : 素材とするアイテムを手にもって実行すると必要素材に入ります。");
                 p.sendMessage(prefix+"§a/msp create "+args[1]+" : 作成を確定し、データを保存します。失敗時はクリアされます。");
-                p.sendMessage(prefix+"§c/msp clear : 作成モードを離れます。データは破棄されます。");
+                p.sendMessage(prefix+"§c/msp cancel : 作成モードを離れます。データは破棄されます。");
                 return true;
             }else if(a.equalsIgnoreCase("takeexp")){
                 if(!nowCreated.containsKey(p.getUniqueId())){

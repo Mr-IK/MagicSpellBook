@@ -15,6 +15,10 @@ public class SpellBookFileManager {
 
     //フォルダの存在を確認しない場合は作成
     public static void checkFolderExist() {
+        File ff = new File(pluginFolder,"");
+        if (!ff.exists()) {
+            ff.mkdir();
+        }
         File f = new File(pluginFolder, folderName);
         if (!f.exists()) {
             f.mkdir();

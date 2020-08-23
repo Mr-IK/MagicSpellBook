@@ -125,7 +125,7 @@ public class MSPData implements Listener {
 
         if(block.getType()!= Material.LECTERN)return;
 
-        Lectern lec = (Lectern) block;
+        Lectern lec = (Lectern) block.getState();
 
         ItemStack book = lec.getInventory().getItem(0);
         if(book==null)return;
@@ -134,10 +134,10 @@ public class MSPData implements Listener {
         if(meta==null)return;
         if(meta.getLore()==null)return;
 
-        if(meta.getLore().get(meta.getLore().size()-1).startsWith("§kMSP:"))return;
+        if(!meta.getLore().get(meta.getLore().size()-1).startsWith("§kMSP:"))return;
 
         String dataid = meta.getLore().get(meta.getLore().size()-1).replace("§kMSP:","");
-        if(fileList.containsKey(dataid))return;
+        if(!fileList.containsKey(dataid))return;
         SpellFile file = fileList.get(dataid);
         //マジックステータス内にこのブロックは何らかの処理が走っていると確認された(続きを行う)
         if(mgStats.containsKey(block.getLocation())){
@@ -171,7 +171,7 @@ public class MSPData implements Listener {
                 safeGiveItem(p,mgs.getSpell().resultGacha());
                 mgs.releaseItem();
                 removeMagic(block.getLocation(),p);
-                p.sendMessage(prefix + "§c発動に成功しました。術式を停止します。");
+                p.sendMessage(prefix + "§a発動に成功しました。術式を停止します。");
                 return;
             }
 
@@ -213,6 +213,8 @@ public class MSPData implements Listener {
         for(ItemStack item:mgs.getInputedItem()){
             inv.addItem(item);
         }
+
+        mgs.resetInputItem();
 
         p.openInventory(inv);
     }
