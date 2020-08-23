@@ -1,6 +1,11 @@
 name: MagicSpellBook
 version: ${project.version}
 main: jp.mkserver.magicspellbook.MagicSpellBook
-api-version: 1.15
+api-version: 1.13
 authors: [Mr_IK]
 description: MagicSpellBook
+commands:
+  msp:
+    description: MSP
+    usage: /<command>
+    default: op

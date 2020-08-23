@@ -13,6 +13,7 @@ public class SpellFile {
     private final String fileName;
     private List<ItemStack> requiredItems;
     private int requiredExp;
+    private int takeExp;
     private HashMap<ItemStack,Integer> resultItems;
 
     public SpellFile(String fileName) {
@@ -39,11 +40,15 @@ public class SpellFile {
         }
     }
 
-    public SpellFile(String fileName,List<ItemStack> requiredItems,int requiredExp,HashMap<ItemStack,Integer> resultItems) {
+    public SpellFile(String fileName,List<ItemStack> requiredItems,int requiredExp,int takeExp,HashMap<ItemStack,Integer> resultItems) {
         //全データをインプットしファイルを作成するタイプ
         //※ゲーム内から新規にデータを作り、ファイルを作るための初期化メソッド
         this.fileName = fileName;
+        if(requiredExp<takeExp){
+            return;
+        }
         this.requiredExp = requiredExp;
+        this.takeExp = takeExp;
         this.resultItems = resultItems;
         this.requiredItems = requiredItems;
 
@@ -93,5 +98,9 @@ public class SpellFile {
         Collections.shuffle(resultRole);
         MagicSpellBook.plugin.getLogger().info("SpellFileDebug: ["+debug+"|"+resultRole.size()+"]");
         return resultRole.get(0);
+    }
+
+    public int getTakeExp() {
+        return takeExp;
     }
 }

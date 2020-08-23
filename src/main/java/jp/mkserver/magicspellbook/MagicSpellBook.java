@@ -10,9 +10,10 @@ import static jp.mkserver.magicspellbook.SpellBookFileManager.checkFolderExist;
 
 public final class MagicSpellBook extends JavaPlugin {
 
-    public static String prefix = "§e§l[§b§lMSBook§e§l]";
+    public static String prefix = "§e§l[§b§lMSBook§e§l]§r";
     public static MagicSpellBook plugin;
     public static MSPData data;
+    public static MSPCommand command;
 
     @Override
     public void onEnable() {
@@ -20,6 +21,8 @@ public final class MagicSpellBook extends JavaPlugin {
         plugin = this;
         checkFolderExist();
         data = new MSPData();
+        command = new MSPCommand();
+        getCommand("msp").setExecutor(command);
     }
 
     @Override

@@ -1,9 +1,6 @@
 package jp.mkserver.magicspellbook;
 
-import com.sun.java.swing.action.AlignRightAction;
 import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -19,6 +16,7 @@ public class MagicStatus {
     private UUID uuid;
     private List<ItemStack> inputedItem;
     private int phase = 0;
+    private boolean getExp = false;
 
     public MagicStatus(SpellFile spell,UUID uuid){
         this.spell = spell;
@@ -35,8 +33,10 @@ public class MagicStatus {
     }
 
     public void releaseItem(){
-        safeGiveItem(Bukkit.getPlayer(uuid),inputedItem);
-        inputedItem.clear();
+        if(Bukkit.getPlayer(uuid)!=null){
+            safeGiveItem(Bukkit.getPlayer(uuid),inputedItem);
+            inputedItem.clear();
+        }
     }
 
     public SpellFile getSpell() {
@@ -75,13 +75,28 @@ public class MagicStatus {
             }
         }
 
-        if(!complete){
-            //ここで失敗時処理
+        if(complete){
+            //ここで成功時処理
+            inputedItem = inp;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean chargeExp() {
+        if(Bukkit.getPlayer(uuid)!=null) {
+            int reqExp = spell.getRequiredExp();
+            int nowLv = Bukkit.getPlayer(uuid).getLevel();
+            if(nowLv<reqExp){
+                return false;
+            }
+            Bukkit.getPlayer(uuid).setLevel(nowLv- spell.getTakeExp());
+            return true;
+        }else{
             return false;
         }
-        inputedItem = inp;
-        return true;
     }
+
 
     public void pushPhase(){
         phase++;

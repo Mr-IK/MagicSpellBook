@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static jp.mkserver.magicspellbook.MagicSpellBook.prefix;
+import static jp.mkserver.magicspellbook.MagicSpellBook.safeGiveItem;
 
 public class MSPData implements Listener {
 
@@ -138,10 +139,9 @@ public class MSPData implements Listener {
         String dataid = meta.getLore().get(meta.getLore().size()-1).replace("§kMSP:","");
         if(fileList.containsKey(dataid))return;
         SpellFile file = fileList.get(dataid);
-
-        e.setCancelled(true);
         //マジックステータス内にこのブロックは何らかの処理が走っていると確認された(続きを行う)
         if(mgStats.containsKey(block.getLocation())){
+            e.setCancelled(true);
             MagicStatus mgs = mgStats.get(block.getLocation());
             if (mgs.getUUID() != p.getUniqueId()) {
                 p.sendMessage(prefix + "§c他人の魔法への干渉はできません！");
@@ -150,27 +150,29 @@ public class MSPData implements Listener {
 
             //フェーズ0: アイテム投入
             if(mgs.getPhase()==0){
-                Inventory inv = Bukkit.createInventory(null,36,prefix);
-                inv.setItem(27,close);
-                inv.setItem(28,close);
-                inv.setItem(29,close);
-                inv.setItem(30,close);
-                inv.setItem(31,wall);
-                inv.setItem(32,start);
-                inv.setItem(33,start);
-                inv.setItem(34,start);
-                inv.setItem(35,start);
-
-                for(ItemStack item:mgs.getInputedItem()){
-                    inv.addItem(item);
-                }
-
-                p.openInventory(inv);
+                openMagicInv(p,mgs);
                 return;
             //フェーズ2: 実行
             }else if(mgs.getPhase()==2) {
-                file.getFileName();
+                if(!mgs.chargeExp()){
+                    p.sendMessage(prefix + "§c発動に必要な経験値が足りないようです。アイテムを返却します。");
+                    mgs.releaseItem();
+                    removeMagic(block.getLocation(),p);
+                    return;
+                }
 
+                if(!mgs.spellCharge()){
+                    p.sendMessage(prefix + "§c発動に必要な材料が足りないようです。アイテムを返却します。");
+                    mgs.releaseItem();
+                    removeMagic(block.getLocation(),p);
+                    return;
+                }
+
+                safeGiveItem(p,mgs.getSpell().resultGacha());
+                mgs.releaseItem();
+                removeMagic(block.getLocation(),p);
+                p.sendMessage(prefix + "§c発動に成功しました。術式を停止します。");
+                return;
             }
 
         //マジックステータス内にブロックの処理は確認できなかった(新しく開始する)
@@ -178,13 +180,45 @@ public class MSPData implements Listener {
             //かつ、他の魔法を行使中ではないなら
             if (mgsPlayers.containsKey(p.getUniqueId())) {
                 p.sendMessage(prefix + "§c魔法の行使中は他の魔法を開始できません！");
+                e.setCancelled(true);
                 return;
             }
+
+            //かつ、プレイヤーがスニーク状態じゃない場合
+            if (p.isSneaking())return;
+
+            e.setCancelled(true);
 
             //マジックステータス及び魔法チェックを作成
             MagicStatus mgs = new MagicStatus(file,p.getUniqueId());
             mgStats.put(block.getLocation(),mgs);
             mgsPlayers.put(p.getUniqueId(),block.getLocation());
+
+            openMagicInv(p,mgs);
         }
+    }
+
+    public void openMagicInv(Player p,MagicStatus mgs){
+        Inventory inv = Bukkit.createInventory(null,36,prefix);
+        inv.setItem(27,close);
+        inv.setItem(28,close);
+        inv.setItem(29,close);
+        inv.setItem(30,close);
+        inv.setItem(31,wall);
+        inv.setItem(32,start);
+        inv.setItem(33,start);
+        inv.setItem(34,start);
+        inv.setItem(35,start);
+
+        for(ItemStack item:mgs.getInputedItem()){
+            inv.addItem(item);
+        }
+
+        p.openInventory(inv);
+    }
+
+    public void removeMagic(Location loc,Player p){
+        mgStats.remove(loc);
+        mgsPlayers.remove(p.getUniqueId());
     }
 }
