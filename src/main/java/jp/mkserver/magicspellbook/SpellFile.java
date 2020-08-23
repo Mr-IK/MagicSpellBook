@@ -29,6 +29,8 @@ public class SpellFile {
 
         requiredExp = yml.getInt("needExp",0);
 
+        takeExp = yml.getInt("takeExp",0);
+
         requiredItems = (List<ItemStack>)yml.get("needItems");
 
         resultItems = new HashMap<>();
@@ -59,6 +61,7 @@ public class SpellFile {
         }
 
         yml.set("needExp",requiredExp);
+        yml.set("takeExp",takeExp);
         yml.set("needItems",requiredItems);
 
         int co = 0;
@@ -86,12 +89,10 @@ public class SpellFile {
     }
 
     public ItemStack resultGacha(){
-        int debug = 0;
         List<ItemStack> resultRole = new ArrayList<>();
         for(ItemStack item : resultItems.keySet()){
             int count = resultItems.get(item);
             for(int i = 0;i<count;i++){
-                debug++;
                 resultRole.add(item);
             }
         }

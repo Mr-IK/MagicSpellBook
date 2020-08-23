@@ -154,7 +154,7 @@ public class MSPData implements Listener {
                 return;
             //フェーズ2: 実行
             }else if(mgs.getPhase()==2) {
-                if(!mgs.chargeExp()){
+                if(!mgs.chargeExp(false)){
                     p.sendMessage(prefix + "§c発動に必要な経験値が足りないようです。アイテムを返却します。");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
@@ -167,7 +167,7 @@ public class MSPData implements Listener {
                     removeMagic(block.getLocation(),p);
                     return;
                 }
-
+                mgs.chargeExp(true);
                 safeGiveItem(p,mgs.getSpell().resultGacha());
                 mgs.releaseItem();
                 removeMagic(block.getLocation(),p);

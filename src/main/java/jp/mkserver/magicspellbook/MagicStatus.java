@@ -57,7 +57,8 @@ public class MagicStatus {
         List<ItemStack> inp = new ArrayList<>(inputedItem);
         for(ItemStack re : req){
             int amore = re.getAmount();
-            for(ItemStack ii : inp){
+            List<ItemStack> inps = new ArrayList<>(inp);
+            for(ItemStack ii : inps){
                 if(!equalItem(re,ii))continue;
                 inp.remove(ii);
                 int imor = ii.getAmount();
@@ -87,14 +88,16 @@ public class MagicStatus {
         return false;
     }
 
-    public boolean chargeExp() {
+    public boolean chargeExp(boolean execute) {
         if(Bukkit.getPlayer(uuid)!=null) {
             int reqExp = spell.getRequiredExp();
             int nowLv = Bukkit.getPlayer(uuid).getLevel();
             if(nowLv<reqExp){
                 return false;
             }
-            Bukkit.getPlayer(uuid).setLevel(nowLv- spell.getTakeExp());
+            if(execute){
+                Bukkit.getPlayer(uuid).setLevel(nowLv- spell.getTakeExp());
+            }
             return true;
         }else{
             return false;
