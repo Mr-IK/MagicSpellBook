@@ -1,8 +1,8 @@
 package jp.mkserver.magicspellbook;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
 import org.bukkit.entity.Player;
@@ -104,10 +104,12 @@ public class MSPData implements Listener {
         }
 
         if(stats.getPhase()==1){
-            p.sendMessage(prefix + "§a準備完了。右クリックして魔法を起動してください。");
+            for(Player as : Bukkit.getOnlinePlayers()){
+                as.playSound(mgsPlayers.get(p.getUniqueId()), Sound.BLOCK_ENCHANTMENT_TABLE_USE,2.0f,0.5f);
+            }
+            mgsPlayers.get(p.getUniqueId()).getWorld().spawnParticle(Particle.PORTAL,mgsPlayers.get(p.getUniqueId()),30);
+            p.sendActionBar("§a§l§o準備完了。右クリックして魔法を起動してください――");
             stats.pushPhase();
-        }else if(stats.getPhase()==0){
-            p.sendMessage(prefix + "§a再度クリックすると投入するアイテムを変更できます！");
         }
     }
 
@@ -144,25 +146,37 @@ public class MSPData implements Listener {
             e.setCancelled(true);
             MagicStatus mgs = mgStats.get(block.getLocation());
             if (mgs.getUUID() != p.getUniqueId()) {
-                p.sendMessage(prefix + "§c他人の魔法への干渉はできません！");
+                p.sendActionBar("§c§l§o他の魔法への干渉は許されません――");
                 return;
             }
 
             //フェーズ0: アイテム投入
             if(mgs.getPhase()==0){
+                for(Player as : Bukkit.getOnlinePlayers()){
+                    as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,1.5f);
+                }
+                block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),30);
                 openMagicInv(p,mgs);
                 return;
             //フェーズ2: 実行
             }else if(mgs.getPhase()==2) {
                 if(!mgs.chargeExp(false)){
-                    p.sendMessage(prefix + "§c発動に必要な経験値が足りないようです。アイテムを返却します。");
+                    for(Player as : Bukkit.getOnlinePlayers()){
+                        as.playSound(block.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,2.0f,0.5f);
+                    }
+                    block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),20);
+                    p.sendActionBar("§c§l§oこの術式を起動するには経験値不足です。アイテムを返却します――");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
                     return;
                 }
 
                 if(!mgs.spellCharge()){
-                    p.sendMessage(prefix + "§c発動に必要な材料が足りないようです。アイテムを返却します。");
+                    for(Player as : Bukkit.getOnlinePlayers()){
+                        as.playSound(block.getLocation(), Sound.UI_BUTTON_CLICK,2.0f,0.5f);
+                    }
+                    block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),20);
+                    p.sendActionBar("§c§l§oこの術式を起動するのには素材不足です。アイテムを返却します――");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
                     return;
@@ -171,7 +185,11 @@ public class MSPData implements Listener {
                 safeGiveItem(p,mgs.getSpell().resultGacha());
                 mgs.releaseItem();
                 removeMagic(block.getLocation(),p);
-                p.sendMessage(prefix + "§a発動に成功しました。術式を停止します。");
+                for(Player as : Bukkit.getOnlinePlayers()){
+                    as.playSound(block.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,2.0f,0.8f);
+                }
+                block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE,block.getLocation(),3);
+                p.sendActionBar("§a§l§o術式の起動に成功。");
                 return;
             }
 
@@ -179,7 +197,7 @@ public class MSPData implements Listener {
         }else {
             //かつ、他の魔法を行使中ではないなら
             if (mgsPlayers.containsKey(p.getUniqueId())) {
-                p.sendMessage(prefix + "§c魔法の行使中は他の魔法を開始できません！");
+                p.sendActionBar("§c§o魔法は並行処理することができない…");
                 e.setCancelled(true);
                 return;
             }
@@ -194,6 +212,10 @@ public class MSPData implements Listener {
             mgStats.put(block.getLocation(),mgs);
             mgsPlayers.put(p.getUniqueId(),block.getLocation());
 
+            for(Player as : Bukkit.getOnlinePlayers()){
+                as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,1.5f);
+            }
+            block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),30);
             openMagicInv(p,mgs);
         }
     }
