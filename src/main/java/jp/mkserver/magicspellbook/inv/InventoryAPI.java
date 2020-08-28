@@ -156,6 +156,11 @@ public class InventoryAPI {
         nowRunnable.clear();
     }
 
+    public void invReload(){
+        listeners.clear();
+        allunregistRunnable();
+    }
+
 
     //inventory clear
     public void clear(){

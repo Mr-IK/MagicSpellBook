@@ -21,6 +21,7 @@ public class UpdateTitle_1_15_2  implements UpdateTitle{
         }else if(inv.getSize()==54){
             con = Containers.GENERIC_9X6;
         }
+
         PacketPlayOutOpenWindow packet = new PacketPlayOutOpenWindow(ep.activeContainer.windowId, con, new ChatMessage(title));
         ep.playerConnection.sendPacket(packet);
         ep.updateInventory(ep.activeContainer);

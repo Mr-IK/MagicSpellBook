@@ -88,7 +88,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();
-                p.closeInventory();
                 openEditGUIMain(p,inv,"test");
             }
             @EventHandler
@@ -363,7 +362,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();
-                p.closeInventory();
                 openAdminGUIMain(p,inv);
             }
             @EventHandler
