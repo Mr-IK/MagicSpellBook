@@ -113,4 +113,8 @@ public class SpellFile {
     public boolean isPower() {
         return power;
     }
+
+    public void setPower(boolean power){
+        this.power = power;
+    }
 }

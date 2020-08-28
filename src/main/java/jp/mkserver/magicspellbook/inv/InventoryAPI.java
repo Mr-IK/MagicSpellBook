@@ -103,6 +103,10 @@ public class InventoryAPI {
         }
     }
 
+    // get inventory size
+    public int getSize(){
+        return inv.getSize();
+    }
 
     //event regist and open inv
     public void openInv(Player p){

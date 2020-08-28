@@ -106,4 +106,12 @@ public class SpellBookFileManager {
             return -1;
         }
     }
+
+    public static boolean removeYMLFile(String name){
+        checkFolderExist();
+
+        File f = new File(pluginFolder, folderName+ File.separator + name + ".yml");
+
+        return f.delete();
+    }
 }

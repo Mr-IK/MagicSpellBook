@@ -20,8 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import static jp.mkserver.magicspellbook.MagicSpellBook.prefix;
-import static jp.mkserver.magicspellbook.MagicSpellBook.safeGiveItem;
+import static jp.mkserver.magicspellbook.MagicSpellBook.*;
 
 public class MSPData implements Listener {
 
@@ -33,7 +32,7 @@ public class MSPData implements Listener {
     MagicSpellBook plugin;
 
     final ItemStack close = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
-    final ItemStack wall = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+    final ItemStack cancel = new ItemStack(Material.RED_STAINED_GLASS_PANE);
     final ItemStack start = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
 
     public MSPData(){
@@ -57,6 +56,13 @@ public class MSPData implements Listener {
         clme.setLore(clmelo);
         close.setItemMeta(clme);
 
+        ItemMeta came = cancel.getItemMeta();
+        came.setDisplayName("§e§l作成をキャンセルする");
+        List<String> camelo = new ArrayList<>();
+        camelo.add("§c作成をキャンセルします。※やり直しはできません！");
+        came.setLore(camelo);
+        cancel.setItemMeta(came);
+
         ItemMeta stme = start.getItemMeta();
         stme.setDisplayName("§e§l合成を始める");
         List<String> stmelo = new ArrayList<>();
@@ -76,9 +82,15 @@ public class MSPData implements Listener {
 
         if(e.getSlot()>=27&&e.getSlot()<=35){
             e.setCancelled(true);
-            if(e.getSlot()>=27&&e.getSlot()<=30){
+            if(e.getSlot()>=27&&e.getSlot()<=29) {
                 p.closeInventory();
-            }else if(e.getSlot()>=32&&e.getSlot()<=35){
+            }else if(e.getSlot()>=30&&e.getSlot()<=32){
+                MagicStatus mgs = mgStats.get(mgsPlayers.get(p.getUniqueId()));
+                p.closeInventory();
+                mgs.releaseItem();
+                removeMagic(mgsPlayers.get(p.getUniqueId()),p);
+                p.sendActionBar("§c§l§o術式がキャンセルされました。アイテムを返却します――");
+            }else if(e.getSlot()>=33&&e.getSlot()<=35){
                 MagicStatus stats = mgStats.get(mgsPlayers.get(p.getUniqueId()));
                 stats.pushPhase();
                 p.closeInventory();
@@ -137,10 +149,32 @@ public class MSPData implements Listener {
         if(!meta.getLore().get(meta.getLore().size()-1).startsWith("§kMSP:"))return;
 
         String dataid = meta.getLore().get(meta.getLore().size()-1).replace("§kMSP:","");
-        if(!fileList.containsKey(dataid))return;
+        if(!fileList.containsKey(dataid)){
+            if(mgStats.containsKey(block.getLocation())) {
+                MagicStatus mgs = mgStats.get(block.getLocation());
+                if (mgs.getUUID() != p.getUniqueId()) {
+                    return;
+                }
+                e.setCancelled(true);
+                mgs.releaseItem();
+                removeMagic(mgsPlayers.get(p.getUniqueId()),p);
+                p.sendActionBar("§c§l§o術式がキャンセルされました。アイテムを返却します――");
+            }
+            return;
+        }
         SpellFile file = fileList.get(dataid);
 
         if(!file.isPower()){
+            if(mgStats.containsKey(block.getLocation())) {
+                MagicStatus mgs = mgStats.get(block.getLocation());
+                if (mgs.getUUID() != p.getUniqueId()) {
+                    return;
+                }
+                e.setCancelled(true);
+                mgs.releaseItem();
+                removeMagic(mgsPlayers.get(p.getUniqueId()),p);
+                p.sendActionBar("§c§l§o術式がキャンセルされました。アイテムを返却します――");
+            }
             return;
         }
 
@@ -228,9 +262,9 @@ public class MSPData implements Listener {
         inv.setItem(27,close);
         inv.setItem(28,close);
         inv.setItem(29,close);
-        inv.setItem(30,close);
-        inv.setItem(31,wall);
-        inv.setItem(32,start);
+        inv.setItem(30,cancel);
+        inv.setItem(31,cancel);
+        inv.setItem(32,cancel);
         inv.setItem(33,start);
         inv.setItem(34,start);
         inv.setItem(35,start);
@@ -247,5 +281,17 @@ public class MSPData implements Listener {
     public void removeMagic(Location loc,Player p){
         mgStats.remove(loc);
         mgsPlayers.remove(p.getUniqueId());
+    }
+
+    public void removeMagicData(String id){
+        if(!data.fileList.containsKey(id)){
+            return;
+        }
+        SpellFile spf = data.fileList.get(id);
+        if(spf.isPower()){
+            return;
+        }
+        data.fileList.remove(id);
+        SpellBookFileManager.removeYMLFile(id);
     }
 }

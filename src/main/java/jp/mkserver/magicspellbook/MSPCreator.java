@@ -18,10 +18,12 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static jp.mkserver.magicspellbook.MagicSpellBook.data;
+
 public class MSPCreator implements Listener, CommandExecutor {
 
     HashMap<UUID, EditedSPFile> noEdited = new HashMap<>();
-    private MagicSpellBook plugin;
+    private final MagicSpellBook plugin;
 
     public MSPCreator(MagicSpellBook plugin){
         this.plugin = plugin;
@@ -48,10 +50,137 @@ public class MSPCreator implements Listener, CommandExecutor {
         return true;
     }
 
+    public void openEditGUISelect(Player p,InventoryAPI inv, int page){
+        boolean update = true;
+        if(inv==null||inv.getSize()!=54){
+            p.closeInventory();
+            inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l管理画面 §9Page:"+page,54);
+            update = false;
+        }else{
+            inv.allunregistRunnable();
+            inv.updateTitle(p,MagicSpellBook.prefix+"§5§l管理画面 §9Page:"+page);
+            inv.clear();
+        }
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.5f);
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                e.setCancelled(true);
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        ItemStack back = inv.createUnbitem("§f§l§o前のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        ItemStack walk = inv.createUnbitem("§f§l§o次のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        inv.setItems(new int[]{45,46},back);
+        inv.setItems(new int[]{47,48,50,51},wall);
+        inv.setItems(new int[]{52,53},walk);
+        inv.setItem(49,inv.createUnbitem("§c§l戻る",new String[]{"§e前のページに戻ります。"},
+                Material.DARK_OAK_DOOR,0,false));
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                if(e.getSlot()!=49){
+                    return;
+                }
+                p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
+                super.inv.regenerateID();
+                super.unregister();
+                p.closeInventory();
+                openAdminGUIMain(p,null);
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                if(e.getSlot()==45||e.getSlot()==46){
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.0f);
+                    if(page==0){
+                        return;
+                    }
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openEditGUISelect(p,inv,page-1);
+                }else if(e.getSlot()==52||e.getSlot()==53){
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.0f);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openEditGUISelect(p,inv,page+1);
+                }
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        int i = page*45;
+        int ii = 0;
+        for(String ssp : MagicSpellBook.data.fileList.keySet()){
+            if(i!=0){
+                i--;
+                continue;
+            }
+            if(ii==45){
+                break;
+            }
+            SpellFile sp = MagicSpellBook.data.fileList.get(ssp);
+            if(sp.isPower()){
+                inv.setItem(ii,inv.createUnbitem("§a§l"+ssp,new String[]{"§eクリックで編集画面へ移行します！"},
+                        Material.EMERALD,0,false));
+            }else{
+                inv.setItem(ii,inv.createUnbitem("§c§l"+ssp,new String[]{"§eクリックで編集画面へ移行します！"},
+                        Material.REDSTONE,0,false));
+            }
+            int finalIi = ii;
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(e.getSlot()!= finalIi){
+                        return;
+                    }
+                    super.inv.regenerateID();
+                    super.unregister();
+                    p.closeInventory();
+                    openEditGUIMain(p,null,ssp);
+                    p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE,1.0f,0.9f);
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            ii++;
+        }
+        if(update){
+            inv.refresh(p);
+        }else{
+            inv.openInv(p);
+        }
+    }
+
 
     public void openAdminGUIMain(Player p,InventoryAPI inv){
         boolean update = true;
-        if(inv==null){
+        if(inv==null||inv.getSize()!=27){
             inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l管理画面 §9§l―メイン―",27);
             update = false;
         }else{
@@ -112,7 +241,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();
-                p.closeInventory();
+                openEditGUISelect(p,inv,0);
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){
@@ -155,7 +284,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     if(!exsist) {
                         EditedSPFile spFile = new EditedSPFile();
                         spFile.fileName = text;
-                        spFile.createSpell();
+                        data.fileList.put(text,spFile.createSpell());
                         openEditGUIMain(p,null,text);
                         p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE,1.0f,0.9f);
                         return AnvilGUI.Response.text("none");
@@ -181,6 +310,10 @@ public class MSPCreator implements Listener, CommandExecutor {
             inv.updateTitle(p,MagicSpellBook.prefix+"§5§l編集画面 §9§l―"+id+"―");
             inv.clear();
         }
+        if(!MagicSpellBook.data.fileList.containsKey(id)){
+            return;
+        }
+        SpellFile sp = MagicSpellBook.data.fileList.get(id);
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
             public void onClick(InventoryClickEvent e){
@@ -196,10 +329,13 @@ public class MSPCreator implements Listener, CommandExecutor {
         });
         ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
         inv.fillInv(wall);
-        inv.setItem(10,inv.createUnbitem("§6§l必要アイテム設定",new String[]{"§e起動に必要なアイテムの設定を行います。"},
-                Material.CHEST,0,false));
-        inv.setItem(4,inv.createUnbitem("§4§l稼働設定",new String[]{"§cこのシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
-                Material.REDSTONE_BLOCK,0,false));
+        if(sp.isPower()){
+            inv.setItem(4,inv.createUnbitem("§a§l稼働設定",new String[]{"§2このシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+                    Material.EMERALD_BLOCK,0,false));
+        }else{
+            inv.setItem(4,inv.createUnbitem("§4§l稼働設定",new String[]{"§cこのシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+                    Material.REDSTONE_BLOCK,0,false));
+        }
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
             public void onClick(InventoryClickEvent e){
@@ -211,15 +347,23 @@ public class MSPCreator implements Listener, CommandExecutor {
                 }
                 p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_FALL,1.0f,0.7f);
                 e.setCancelled(true);
-                super.inv.regenerateID();
-                super.unregister();
-                p.closeInventory();
+                if(!sp.isPower()){
+                    inv.setItem(4,inv.createUnbitem("§a§l稼働設定",new String[]{"§2このシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+                            Material.EMERALD_BLOCK,0,false));
+                    sp.setPower(true);
+                }else{
+                    inv.setItem(4,inv.createUnbitem("§4§l稼働設定",new String[]{"§cこのシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+                            Material.REDSTONE_BLOCK,0,false));
+                    sp.setPower(false);
+                }
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){
                 super.closeCheck(e);
             }
         });
+        inv.setItem(10,inv.createUnbitem("§6§l必要アイテム設定",new String[]{"§e起動に必要なアイテムの設定を行います。"},
+                Material.CHEST,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
             public void onClick(InventoryClickEvent e){
@@ -275,9 +419,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                 }
                 p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN,1.0f,1.0f);
                 e.setCancelled(true);
-                super.inv.regenerateID();
-                super.unregister();
-                p.closeInventory();
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){
