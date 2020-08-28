@@ -181,6 +181,7 @@ public class MSPCreator implements Listener, CommandExecutor {
     public void openAdminGUIMain(Player p,InventoryAPI inv){
         boolean update = true;
         if(inv==null||inv.getSize()!=27){
+            p.closeInventory();
             inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l管理画面 §9§l―メイン―",27);
             update = false;
         }else{
@@ -384,7 +385,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        inv.setItem(11,inv.createUnbitem("§a§l必要・消費経験値設定",new String[]{"§e起動時に必要・消費する経験値の設定を行います。"},
+        inv.setItem(11,inv.createUnbitem("§a§l必要・消費経験値設定",new String[]{"§e起動時に必要・消費する","§e経験値の設定を行います。"},
                 Material.EXPERIENCE_BOTTLE,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
@@ -447,7 +448,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        inv.setItem(14,inv.createUnbitem("§4§l完成・失敗時本破壊設定",new String[]{"§e起動失敗・成功時に魔術書を破壊する設定を行います。"},
+        inv.setItem(14,inv.createUnbitem("§4§l完成・失敗時本破壊設定",new String[]{"§e起動失敗・成功時に","§e魔術書を破壊する設定を行います。"},
                 Material.BOOK,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
@@ -469,7 +470,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        inv.setItem(15,inv.createUnbitem("§b§l完成品設定",new String[]{"§e起動成功時に得られるアイテムの設定を行います。"},
+        inv.setItem(15,inv.createUnbitem("§b§l完成品設定",new String[]{"§e起動成功時に得られる","§eアイテムの設定を行います。"},
                 Material.LIGHT_BLUE_SHULKER_BOX,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
@@ -536,7 +537,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             }
         });
         inv.setItem(26,inv.createUnbitem("§4§l削除",new String[]{"§cこの魔法パターンを削除します。"},
-                Material.REDSTONE_BLOCK,0,false));
+                Material.BARRIER,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
             public void onClick(InventoryClickEvent e){
@@ -550,7 +551,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();
-                p.closeInventory();
+                openConfirmGUI(p,inv,id,"delete");
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){
@@ -562,5 +563,86 @@ public class MSPCreator implements Listener, CommandExecutor {
         }else{
             inv.openInv(p);
         }
+    }
+
+    public void openConfirmGUI(Player p,InventoryAPI inv, String id, String type){
+        if(type.equalsIgnoreCase("delete")){
+            boolean update = true;
+            if(inv==null||inv.getSize()!=27){
+                p.closeInventory();
+                inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l確認画面",27);
+                update = false;
+            }else{
+                inv.allunregistRunnable();
+                inv.updateTitle(p,MagicSpellBook.prefix+"§5§l確認画面");
+                inv.clear();
+            }
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.5f);
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    e.setCancelled(true);
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+            ItemStack ok = inv.createUnbitem("§4§l"+id+"§c§lを削除する",new String[]{}, Material.BARRIER,0,false);
+            ItemStack cancel = inv.createUnbitem("§a§lキャンセル",new String[]{}, Material.GREEN_STAINED_GLASS_PANE,0,false);
+            inv.setItems(new int[]{0,1,2,3,9,10,11,12,18,19,20,21},ok);
+            inv.setItems(new int[]{4,13,22},wall);
+            inv.setItems(new int[]{5,6,7,8,14,15,16,17,23,24,25,26},cancel);
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(!((e.getSlot()>=0&&e.getSlot()<=3)||(e.getSlot()>=9&&e.getSlot()<=12)||(e.getSlot()>=18&&e.getSlot()<=21))){
+                        return;
+                    }
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
+                    MagicSpellBook.data.removeMagicData(id);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openAdminGUIMain(p,inv);
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(!((e.getSlot()>=5&&e.getSlot()<=8)||(e.getSlot()>=14&&e.getSlot()<=17)||(e.getSlot()>=23&&e.getSlot()<=26))){
+                        return;
+                    }
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openEditGUIMain(p,inv,id);
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            if(update){
+                inv.refresh(p);
+            }else{
+                inv.openInv(p);
+            }
+            return;
+        }
+        openEditGUIMain(p,inv,id);
     }
 }
