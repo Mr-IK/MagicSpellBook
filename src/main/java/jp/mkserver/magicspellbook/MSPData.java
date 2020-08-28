@@ -1,7 +1,5 @@
 package jp.mkserver.magicspellbook;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
@@ -107,7 +105,7 @@ public class MSPData implements Listener {
             for(Player as : Bukkit.getOnlinePlayers()){
                 as.playSound(mgsPlayers.get(p.getUniqueId()), Sound.BLOCK_ENCHANTMENT_TABLE_USE,2.0f,0.5f);
             }
-            mgsPlayers.get(p.getUniqueId()).getWorld().spawnParticle(Particle.PORTAL,mgsPlayers.get(p.getUniqueId()),30);
+            mgsPlayers.get(p.getUniqueId()).getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE,mgsPlayers.get(p.getUniqueId()),50);
             p.sendActionBar("§a§l§o準備完了。右クリックして魔法を起動してください――");
             stats.pushPhase();
         }
@@ -153,18 +151,18 @@ public class MSPData implements Listener {
             //フェーズ0: アイテム投入
             if(mgs.getPhase()==0){
                 for(Player as : Bukkit.getOnlinePlayers()){
-                    as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,1.5f);
+                    as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,0.5f);
                 }
-                block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),30);
+                block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),80);
                 openMagicInv(p,mgs);
                 return;
             //フェーズ2: 実行
             }else if(mgs.getPhase()==2) {
                 if(!mgs.chargeExp(false)){
                     for(Player as : Bukkit.getOnlinePlayers()){
-                        as.playSound(block.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,2.0f,0.5f);
+                        as.playSound(block.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,2.0f,0.5f);
                     }
-                    block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),20);
+                    block.getWorld().spawnParticle(Particle.SPELL_WITCH,block.getLocation(),20);
                     p.sendActionBar("§c§l§oこの術式を起動するには経験値不足です。アイテムを返却します――");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
@@ -173,9 +171,9 @@ public class MSPData implements Listener {
 
                 if(!mgs.spellCharge()){
                     for(Player as : Bukkit.getOnlinePlayers()){
-                        as.playSound(block.getLocation(), Sound.UI_BUTTON_CLICK,2.0f,0.5f);
+                        as.playSound(block.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,2.0f,0.5f);
                     }
-                    block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),20);
+                    block.getWorld().spawnParticle(Particle.SMOKE_LARGE,block.getLocation(),20);
                     p.sendActionBar("§c§l§oこの術式を起動するのには素材不足です。アイテムを返却します――");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
@@ -186,9 +184,9 @@ public class MSPData implements Listener {
                 mgs.releaseItem();
                 removeMagic(block.getLocation(),p);
                 for(Player as : Bukkit.getOnlinePlayers()){
-                    as.playSound(block.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,2.0f,0.8f);
+                    as.playSound(block.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE,2.0f,1.5f);
                 }
-                block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE,block.getLocation(),3);
+                block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),50);
                 p.sendActionBar("§a§l§o術式の起動に成功。");
                 return;
             }
@@ -213,9 +211,9 @@ public class MSPData implements Listener {
             mgsPlayers.put(p.getUniqueId(),block.getLocation());
 
             for(Player as : Bukkit.getOnlinePlayers()){
-                as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,1.5f);
+                as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,0.5f);
             }
-            block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),30);
+            block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),80);
             openMagicInv(p,mgs);
         }
     }

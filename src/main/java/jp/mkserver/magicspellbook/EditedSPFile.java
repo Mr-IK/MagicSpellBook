@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CreatedSPFile {
+public class EditedSPFile {
 
     public String fileName;
     public List<ItemStack> requiredItems = new ArrayList<>();

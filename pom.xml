@@ -6,7 +6,7 @@
 
     <groupId>jp.mkserver</groupId>
     <artifactId>MagicSpellBook</artifactId>
-    <version>0.1-Alpha</version>
+    <version>0.2-Alpha</version>
     <packaging>jar</packaging>
 
     <name>MagicSpellBook</name>
@@ -69,7 +69,27 @@
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.15.2-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api-1.15.2</artifactId>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/spigot-1.15.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api-1.16.1</artifactId>
+            <version>1.16.1-R0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/spigot-1.16.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api-1.16.2</artifactId>
+            <version>1.16.2-R0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/spigot-1.16.2.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
