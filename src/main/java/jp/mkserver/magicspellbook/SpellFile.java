@@ -10,6 +10,7 @@ import java.util.List;
 
 public class SpellFile {
 
+    private boolean power;
     private final String fileName;
     private List<ItemStack> requiredItems;
     private int requiredExp;
@@ -27,6 +28,8 @@ public class SpellFile {
             return;
         }
 
+        power = yml.getBoolean("power",false);
+
         requiredExp = yml.getInt("needExp",0);
 
         takeExp = yml.getInt("takeExp",0);
@@ -35,20 +38,23 @@ public class SpellFile {
 
         resultItems = new HashMap<>();
 
-        for(String key : yml.getConfigurationSection("resultItems").getKeys(false)){
-            ItemStack result = yml.getItemStack("resultItems."+key+".i");
-            int count = yml.getInt("resultItems."+key+".c",1);
-            resultItems.put(result,count);
+        if(yml.contains("resultItems")) {
+            for (String key : yml.getConfigurationSection("resultItems").getKeys(false)) {
+                ItemStack result = yml.getItemStack("resultItems." + key + ".i");
+                int count = yml.getInt("resultItems." + key + ".c", 1);
+                resultItems.put(result, count);
+            }
         }
     }
 
-    public SpellFile(String fileName,List<ItemStack> requiredItems,int requiredExp,int takeExp,HashMap<ItemStack,Integer> resultItems) {
+    public SpellFile(boolean power,String fileName,List<ItemStack> requiredItems,int requiredExp,int takeExp,HashMap<ItemStack,Integer> resultItems) {
         //全データをインプットしファイルを作成するタイプ
         //※ゲーム内から新規にデータを作り、ファイルを作るための初期化メソッド
         this.fileName = fileName;
         if(requiredExp<takeExp){
             return;
         }
+        this.power = power;
         this.requiredExp = requiredExp;
         this.takeExp = takeExp;
         this.resultItems = resultItems;
@@ -59,7 +65,7 @@ public class SpellFile {
         if(yml == null){
             return;
         }
-
+        yml.set("power",power);
         yml.set("needExp",requiredExp);
         yml.set("takeExp",takeExp);
         yml.set("needItems",requiredItems);
@@ -102,5 +108,9 @@ public class SpellFile {
 
     public int getTakeExp() {
         return takeExp;
+    }
+
+    public boolean isPower() {
+        return power;
     }
 }

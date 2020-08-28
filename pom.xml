@@ -29,6 +29,24 @@
                 </configuration>
             </plugin>
             <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.4</version>
@@ -62,13 +80,28 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
+            <groupId>com.github.WesJD.AnvilGUI</groupId>
+            <artifactId>anvilgui</artifactId>
+            <version>cee0bef</version>
+        </dependency>
+        <dependency>
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.15.2-R0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jp.mkserver</groupId>
+                    <artifactId>MagicSpellBook</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
@@ -76,6 +109,12 @@
             <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>${basedir}/libs/spigot-1.15.2.jar</systemPath>
+            <exclusions>
+                <exclusion>
+                    <groupId>jp.mkserver</groupId>
+                    <artifactId>MagicSpellBook</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
@@ -83,6 +122,12 @@
             <version>1.16.1-R0.1-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>${basedir}/libs/spigot-1.16.1.jar</systemPath>
+            <exclusions>
+                <exclusion>
+                    <groupId>jp.mkserver</groupId>
+                    <artifactId>MagicSpellBook</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
@@ -90,6 +135,12 @@
             <version>1.16.2-R0.1-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>${basedir}/libs/spigot-1.16.2.jar</systemPath>
+            <exclusions>
+                <exclusion>
+                    <groupId>jp.mkserver</groupId>
+                    <artifactId>MagicSpellBook</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

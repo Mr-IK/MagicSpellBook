@@ -139,6 +139,11 @@ public class MSPData implements Listener {
         String dataid = meta.getLore().get(meta.getLore().size()-1).replace("§kMSP:","");
         if(!fileList.containsKey(dataid))return;
         SpellFile file = fileList.get(dataid);
+
+        if(!file.isPower()){
+            return;
+        }
+
         //マジックステータス内にこのブロックは何らかの処理が走っていると確認された(続きを行う)
         if(mgStats.containsKey(block.getLocation())){
             e.setCancelled(true);

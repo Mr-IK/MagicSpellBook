@@ -2,6 +2,7 @@ package jp.mkserver.magicspellbook;
 
 import jp.mkserver.magicspellbook.inv.InvListener;
 import jp.mkserver.magicspellbook.inv.InventoryAPI;
+import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -58,6 +59,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             inv.updateTitle(p,MagicSpellBook.prefix+"§5§l管理画面 §9§l―メイン―");
             inv.clear();
         }
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.5f);
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
             public void onClick(InventoryClickEvent e){
@@ -71,7 +73,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        ItemStack wall = inv.createUnbitem("",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
         inv.fillInv(wall);
         inv.setItem(11,inv.createUnbitem("§a§l新規作成",new String[]{"§e一から魔法パターンを作成します。"},
                 Material.WRITABLE_BOOK,0,false));
@@ -88,7 +90,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();
-                openEditGUIMain(p,inv,"test");
+                openCreateGUIStart(p);
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){
@@ -146,9 +148,32 @@ public class MSPCreator implements Listener, CommandExecutor {
         }
     }
 
+    public void openCreateGUIStart(Player p){
+        new AnvilGUI.Builder()
+                .onComplete((player, text) -> {           //called when the inventory output slot is clicked
+                    boolean exsist = MagicSpellBook.data.fileList.containsKey(text);
+                    if(!exsist) {
+                        EditedSPFile spFile = new EditedSPFile();
+                        spFile.fileName = text;
+                        spFile.createSpell();
+                        openEditGUIMain(p,null,text);
+                        p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE,1.0f,0.9f);
+                        return AnvilGUI.Response.text("none");
+                    } else {
+                        return AnvilGUI.Response.text("そのidは既に存在しています!");
+                    }
+                })
+                .text("ここにidを入力してください!")     //sets the text the GUI should start with
+                .item(new ItemStack(Material.NAME_TAG)) //use a custom item for the first slot
+                .title(MagicSpellBook.prefix+"§2§l作成画面")   //set the title of the GUI (only works in 1.14+)
+                .plugin(plugin)                 //set the plugin instance
+                .open(p);                          //opens the GUI for the player provided
+    }
+
     public void openEditGUIMain(Player p,InventoryAPI inv, String id){
         boolean update = true;
         if(inv==null){
+            p.closeInventory();
             inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l編集画面 §9§l―"+id+"―",27);
             update = false;
         }else{
@@ -169,7 +194,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        ItemStack wall = inv.createUnbitem("",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
         inv.fillInv(wall);
         inv.setItem(10,inv.createUnbitem("§6§l必要アイテム設定",new String[]{"§e起動に必要なアイテムの設定を行います。"},
                 Material.CHEST,0,false));
@@ -184,7 +209,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 if(e.getSlot()!=4){
                     return;
                 }
-                p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_FALL,1.0f,1.2f);
+                p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_FALL,1.0f,0.7f);
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();
@@ -380,7 +405,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 if(e.getSlot()!=26){
                     return;
                 }
-                p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_FALL,1.0f,1.2f);
+                p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_FALL,1.0f,1.0f);
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();

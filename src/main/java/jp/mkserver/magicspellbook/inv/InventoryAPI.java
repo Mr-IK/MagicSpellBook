@@ -1,5 +1,6 @@
 package jp.mkserver.magicspellbook.inv;
 
+import jp.mkserver.magicspellbook.MagicSpellBook;
 import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle;
 import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_15_2;
 import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_16_1;
@@ -11,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -25,6 +27,7 @@ import java.util.UUID;
 
 /*
   2018/12/17 Mr_IK 作成。
+  2020/08/29 Mr_IK アップデート。
   インベントリのあらゆる機能を最大限使用できるAPIです
  */
 
@@ -49,36 +52,7 @@ public class InventoryAPI {
         this.name = getInvUniqueID()+name;
         listeners = new ArrayList<>();
         nowRunnable = new ArrayList<>();
-        checkToUTitle();
-    }
-
-    private void checkToUTitle(){
-        String version;
-        try {
-
-            version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-
-        } catch (ArrayIndexOutOfBoundsException whatVersionAreYouUsingException) {
-            return;
-        }
-
-        switch (version) {
-            case "v1_15_R1":
-                //server is running 1.8-1.8.1 so we need to use the 1.8 R1 NMS class
-                updateTitle = new UpdateTitle_1_15_2();
-
-                break;
-            case "v1_16_R1":
-                //server is running 1.8.3 so we need to use the 1.8 R2 NMS class
-                updateTitle = new UpdateTitle_1_16_1();
-                break;
-            case "v1_16_R2":
-                //server is running 1.8.3 so we need to use the 1.8 R2 NMS class
-                updateTitle = new UpdateTitle_1_16_2();
-                break;
-        }
-        // This will return true if the server version was compatible with one of our NMS classes
-        // because if it is, our actionbar would not be null
+        updateTitle = MagicSpellBook.updateTitle;
     }
 
     //updated inv

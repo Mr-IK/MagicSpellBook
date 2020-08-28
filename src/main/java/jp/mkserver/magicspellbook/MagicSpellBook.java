@@ -1,5 +1,10 @@
 package jp.mkserver.magicspellbook;
 
+import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle;
+import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_15_2;
+import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_16_1;
+import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_16_2;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,11 +20,13 @@ public final class MagicSpellBook extends JavaPlugin {
     public static MSPData data;
     // public static MSPCommand command;
     public static MSPCreator creator;
+    public static UpdateTitle updateTitle;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         plugin = this;
+        checkToUTitle();
         checkFolderExist();
         data = new MSPData();
         // command = new MSPCommand();
@@ -30,6 +37,35 @@ public final class MagicSpellBook extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    private void checkToUTitle(){
+        String version;
+        try {
+
+            version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+
+        } catch (ArrayIndexOutOfBoundsException whatVersionAreYouUsingException) {
+            return;
+        }
+
+        switch (version) {
+            case "v1_15_R1":
+                //server is running 1.8-1.8.1 so we need to use the 1.8 R1 NMS class
+                updateTitle = new UpdateTitle_1_15_2();
+
+                break;
+            case "v1_16_R1":
+                //server is running 1.8.3 so we need to use the 1.8 R2 NMS class
+                updateTitle = new UpdateTitle_1_16_1();
+                break;
+            case "v1_16_R2":
+                //server is running 1.8.3 so we need to use the 1.8 R2 NMS class
+                updateTitle = new UpdateTitle_1_16_2();
+                break;
+        }
+        // This will return true if the server version was compatible with one of our NMS classes
+        // because if it is, our actionbar would not be null
     }
 
     public static void safeGiveItem(Player p, ItemStack item){
