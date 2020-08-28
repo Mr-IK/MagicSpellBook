@@ -266,6 +266,18 @@ public class InventoryAPI {
         return items;
     }
 
+    public ItemStack overhaulItem(ItemStack item,String name, String[] lore){
+        ItemMeta meta = item.getItemMeta();
+        if(lore!=null){
+            meta.setLore(Arrays.asList(lore));
+        }
+        if(name!=null){
+            meta.setDisplayName(name);
+        }
+        item.setItemMeta(meta);
+        return item;
+    }
+
     public boolean isEmpty(){
         return inv.firstEmpty()==-1;
     }

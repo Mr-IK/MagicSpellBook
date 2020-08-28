@@ -10,7 +10,7 @@ import java.util.UUID;
 public class InvListener implements Listener {
     private JavaPlugin plugin;
     protected InventoryAPI inv;
-    private UUID player;
+    protected UUID player;
     private String unique;
 
     public InvListener(JavaPlugin plugin, InventoryAPI inv){

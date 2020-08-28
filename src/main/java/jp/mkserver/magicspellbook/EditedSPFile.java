@@ -10,7 +10,6 @@ public class EditedSPFile {
 
     public String fileName;
     public List<ItemStack> requiredItems = new ArrayList<>();
-    public String eisyou;
     public boolean power = false;
     public int requiredExp = 0;
     public int takeExp = 0;

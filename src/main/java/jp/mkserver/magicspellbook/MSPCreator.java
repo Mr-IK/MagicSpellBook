@@ -2,23 +2,26 @@ package jp.mkserver.magicspellbook;
 
 import jp.mkserver.magicspellbook.inv.InvListener;
 import jp.mkserver.magicspellbook.inv.InventoryAPI;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
-
 import java.util.HashMap;
 import java.util.UUID;
 
 import static jp.mkserver.magicspellbook.MagicSpellBook.data;
+import static jp.mkserver.magicspellbook.MagicSpellBook.prefix;
 
 public class MSPCreator implements Listener, CommandExecutor {
 
@@ -45,6 +48,26 @@ public class MSPCreator implements Listener, CommandExecutor {
         if(args.length==0){
             openAdminGUIMain(p,null);
             return true;
+        }else if(args.length==1){
+            if(data.fileList.containsKey(args[0])){
+                ItemStack item = p.getInventory().getItemInMainHand();
+                if(item.getType()== Material.AIR){
+                    p.sendMessage(prefix+"§cアイテムを手に持ってください。");
+                    return true;
+                }
+                net.minecraft.server.v1_15_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+                NBTTagCompound nbttag = nmsItem.getTag();
+                if(nbttag!=null){
+                    nbttag.setString("MagicSpellBookData", "MSP:"+args[0]);
+                }
+                nmsItem.setTag(nbttag);
+                ItemStack citem = CraftItemStack.asBukkitCopy(nmsItem);
+                p.getInventory().setItemInMainHand(citem);
+                p.sendMessage(prefix+"§aセットが完了しました。");
+            }else{
+                p.sendMessage(prefix+"§c存在しないidです。");
+                return true;
+            }
         }
         p.sendMessage(MagicSpellBook.prefix+"§e/msp");
         return true;
@@ -177,6 +200,293 @@ public class MSPCreator implements Listener, CommandExecutor {
         }
     }
 
+    public void openReqItemSelect(Player p,InventoryAPI inv, String id,int page){
+        boolean update = true;
+        if(inv==null||inv.getSize()!=54){
+            p.closeInventory();
+            inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l必要アイテム管理 §9Page:"+page,54);
+            update = false;
+        }else{
+            inv.allunregistRunnable();
+            inv.updateTitle(p,MagicSpellBook.prefix+"§5§l必要アイテム管理 §9Page:"+page);
+            inv.clear();
+        }
+        if(!MagicSpellBook.data.fileList.containsKey(id)){
+            return;
+        }
+        SpellFile sp = MagicSpellBook.data.fileList.get(id);
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.5f);
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(e.getClickedInventory() == null){
+                    return;
+                }
+                if(super.player==null||!e.getWhoClicked().getUniqueId().equals(super.player)){
+                    return;
+                }
+                if(!checkUnique()){
+                    return;
+                }
+                e.setCancelled(true);
+                if(e.getClickedInventory().equals(e.getWhoClicked().getInventory())){
+                    ItemStack item = p.getInventory().getItem(e.getSlot());
+                    if(item==null||item.getType()==Material.AIR){
+                        return;
+                    }
+                    sp.getRequiredItems().add(item);
+                    p.getInventory().setItem(e.getSlot(),null);
+                    openReqItemSelect(p,inv,id,page);
+                }
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        ItemStack back = inv.createUnbitem("§f§l§o前のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        ItemStack walk = inv.createUnbitem("§f§l§o次のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        inv.setItems(new int[]{45,46},back);
+        inv.setItems(new int[]{47,48,50,51},wall);
+        inv.setItems(new int[]{52,53},walk);
+        inv.setItem(49,inv.createUnbitem("§c§l戻る",new String[]{"§e前のページに戻ります。"},
+                Material.DARK_OAK_DOOR,0,false));
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                if(e.getSlot()==45||e.getSlot()==46){
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.0f);
+                    if(page==0){
+                        return;
+                    }
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openReqItemSelect(p,inv,id,page-1);
+                }else if(e.getSlot()==52||e.getSlot()==53){
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.0f);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openReqItemSelect(p,inv,id,page+1);
+                }else if(e.getSlot()==49){
+                    sp.saveYML();
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    p.closeInventory();
+                    openEditGUIMain(p,null,id);
+                }
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        int i = page*45;
+        int ii = 0;
+        for(ItemStack item : sp.getRequiredItems()){
+            if(i!=0){
+                i--;
+                continue;
+            }
+            if(ii==45){
+                break;
+            }
+            ItemStack citem = item.clone();
+            inv.setItem(ii,inv.overhaulItem(citem,null,
+                    new String[]{"§cホイールクリックで削除します"}));
+            int finalIi = ii;
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(e.getSlot()!= finalIi){
+                        return;
+                    }
+                    super.inv.regenerateID();
+                    super.unregister();
+                    if(e.getClick()== ClickType.MIDDLE){
+                        p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE,1.0f,0.9f);
+                        MagicSpellBook.safeGiveItem(p,item);
+                        sp.getRequiredItems().remove(item);
+                        openReqItemSelect(p,inv,id,page);
+                    }
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            ii++;
+        }
+        if(update){
+            inv.refresh(p);
+        }else{
+            inv.openInv(p);
+        }
+    }
+
+    public void openResItemSelect(Player p,InventoryAPI inv, String id,int page){
+        boolean update = true;
+        if(inv==null||inv.getSize()!=54){
+            p.closeInventory();
+            inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l報酬アイテム管理 §9Page:"+page,54);
+            update = false;
+        }else{
+            inv.allunregistRunnable();
+            inv.updateTitle(p,MagicSpellBook.prefix+"§5§l報酬アイテム管理 §9Page:"+page);
+            inv.clear();
+        }
+        if(!MagicSpellBook.data.fileList.containsKey(id)){
+            return;
+        }
+        SpellFile sp = MagicSpellBook.data.fileList.get(id);
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.5f);
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(e.getClickedInventory() == null){
+                    return;
+                }
+                if(super.player==null||!e.getWhoClicked().getUniqueId().equals(super.player)){
+                    return;
+                }
+                if(!checkUnique()){
+                    return;
+                }
+                e.setCancelled(true);
+                if(e.getClickedInventory().equals(e.getWhoClicked().getInventory())){
+                    ItemStack item = p.getInventory().getItem(e.getSlot());
+                    if(item==null||item.getType()==Material.AIR){
+                        return;
+                    }
+                    sp.getResultItems().put(item,0);
+                    p.getInventory().setItem(e.getSlot(),null);
+                    openResItemSelect(p,inv,id,page);
+                }
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        ItemStack back = inv.createUnbitem("§f§l§o前のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        ItemStack walk = inv.createUnbitem("§f§l§o次のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        inv.setItems(new int[]{45,46},back);
+        inv.setItems(new int[]{47,48,50,51},wall);
+        inv.setItems(new int[]{52,53},walk);
+        inv.setItem(49,inv.createUnbitem("§c§l戻る",new String[]{"§e前のページに戻ります。"},
+                Material.DARK_OAK_DOOR,0,false));
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                if(e.getSlot()==45||e.getSlot()==46){
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.0f);
+                    if(page==0){
+                        return;
+                    }
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openResItemSelect(p,inv,id,page-1);
+                }else if(e.getSlot()==52||e.getSlot()==53){
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.0f);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openResItemSelect(p,inv,id,page+1);
+                }else if(e.getSlot()==49){
+                    sp.saveYML();
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    p.closeInventory();
+                    openEditGUIMain(p,null,id);
+                }
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        int i = page*45;
+        int ii = 0;
+        for(ItemStack item : sp.getResultItems().keySet()){
+            int count = sp.getResultItems().get(item);
+            if(i!=0){
+                i--;
+                continue;
+            }
+            if(ii==45){
+                break;
+            }
+            ItemStack citem = item.clone();
+            inv.setItem(ii,inv.overhaulItem(citem,null,
+                    new String[]{"§cホイールクリックで削除","§e通常/シフトクリックで確率をセット",
+                            "§e左: +1(シフトで+10) 右: -1(シフトで-10)","§e§l現在: "+count}));
+            int finalIi = ii;
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(e.getSlot()!= finalIi){
+                        return;
+                    }
+                    super.inv.regenerateID();
+                    super.unregister();
+                    if(e.getClick()== ClickType.MIDDLE){
+                        MagicSpellBook.safeGiveItem(p,item);
+                        sp.getResultItems().remove(item);
+                        openResItemSelect(p,inv,id,page);
+                        p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_DEATH,1.0f,0.9f);
+                    }else if(e.getClick()== ClickType.LEFT||e.getClick()== ClickType.SHIFT_LEFT){
+                        if(e.getClick()== ClickType.SHIFT_LEFT){
+                            sp.getResultItems().put(item,count+10);
+                        }else {
+                            sp.getResultItems().put(item, count+1);
+                        }
+                        openResItemSelect(p,inv,id,page);
+                        p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT,1.0f,0.9f);
+                    }else if(e.getClick()== ClickType.RIGHT||e.getClick()== ClickType.SHIFT_RIGHT){
+                        if(e.getClick()== ClickType.SHIFT_RIGHT){
+                            if((count-10)<0){
+                                sp.getResultItems().put(item,0);
+                            }else{
+                                sp.getResultItems().put(item,count-10);
+                            }
+                        }else {
+                            if((count-1)<0){
+                                sp.getResultItems().put(citem,0);
+                            }else{
+                                sp.getResultItems().put(item, count-1);
+                            }
+                        }
+                        openResItemSelect(p,inv,id,page);
+                        p.playSound(p.getLocation(), Sound.ENTITY_ENDERMITE_HURT,1.0f,0.9f);
+                    }
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            ii++;
+        }
+        if(update){
+            inv.refresh(p);
+        }else{
+            inv.openInv(p);
+        }
+    }
 
     public void openAdminGUIMain(Player p,InventoryAPI inv){
         boolean update = true;
@@ -379,6 +689,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.inv.regenerateID();
                 super.unregister();
                 p.closeInventory();
+                openReqItemSelect(p,null,id,0);
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){
@@ -407,7 +718,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        inv.setItem(12,inv.createUnbitem("§3§l詠唱設定",new String[]{"§e起動時の詠唱に関する設定を行います。"},
+        inv.setItem(12,inv.createUnbitem("§3§l詠唱設定",new String[]{"§e詠唱に関する設定をします"},
                 Material.PAPER,0,true));
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
@@ -486,6 +797,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.inv.regenerateID();
                 super.unregister();
                 p.closeInventory();
+                openResItemSelect(p,inv,id,0);
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){
@@ -514,7 +826,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        inv.setItem(18,inv.createUnbitem("§c§l戻る",new String[]{"§e編集を終えて、前のページに戻ります。"},
+        inv.setItem(18,inv.createUnbitem("§c§l保存して戻る",new String[]{"§e編集を終えて、前のページに戻ります。"},
                 Material.DARK_OAK_DOOR,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
             @EventHandler
@@ -525,6 +837,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 if(e.getSlot()!=18){
                     return;
                 }
+                sp.saveYML();
                 p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
                 e.setCancelled(true);
                 super.inv.regenerateID();

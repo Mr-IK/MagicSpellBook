@@ -81,6 +81,26 @@ public class SpellFile {
         SpellBookFileManager.saveYMLFile(fileName,yml);
     }
 
+    public void saveYML(){
+        FileConfiguration yml = SpellBookFileManager.loadYMLFile(fileName);
+        if(yml == null){
+            return;
+        }
+        yml.set("power",power);
+        yml.set("needExp",requiredExp);
+        yml.set("takeExp",takeExp);
+        yml.set("needItems",requiredItems);
+
+        int co = 0;
+        for(ItemStack item : resultItems.keySet()){
+            int count = resultItems.get(item);
+            yml.set("resultItems."+co+".i",item);
+            yml.set("resultItems."+co+".c",count);
+            co++;
+        }
+        SpellBookFileManager.saveYMLFile(fileName,yml);
+    }
+
 
     public String getFileName() {
         return fileName;
@@ -116,5 +136,9 @@ public class SpellFile {
 
     public void setPower(boolean power){
         this.power = power;
+    }
+
+    public HashMap<ItemStack,Integer> getResultItems(){
+        return resultItems;
     }
 }

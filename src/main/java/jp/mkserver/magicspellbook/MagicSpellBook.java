@@ -37,6 +37,9 @@ public final class MagicSpellBook extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        for(SpellFile sp : data.fileList.values()){
+            sp.saveYML();
+        }
     }
 
     private void checkToUTitle(){

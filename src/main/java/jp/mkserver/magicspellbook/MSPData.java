@@ -1,8 +1,10 @@
 package jp.mkserver.magicspellbook;
 
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -142,13 +144,12 @@ public class MSPData implements Listener {
         ItemStack book = lec.getInventory().getItem(0);
         if(book==null)return;
 
-        ItemMeta meta = book.getItemMeta();
-        if(meta==null)return;
-        if(meta.getLore()==null)return;
+        net.minecraft.server.v1_15_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(book);
+        NBTTagCompound nbttag = nmsItem.getTag();
+        if(nbttag==null)return;
 
-        if(!meta.getLore().get(meta.getLore().size()-1).startsWith("§kMSP:"))return;
+        String dataid = nbttag.getString("MagicSpellBookData").replaceFirst("§kMSP:","");
 
-        String dataid = meta.getLore().get(meta.getLore().size()-1).replace("§kMSP:","");
         if(!fileList.containsKey(dataid)){
             if(mgStats.containsKey(block.getLocation())) {
                 MagicStatus mgs = mgStats.get(block.getLocation());
