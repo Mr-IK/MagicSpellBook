@@ -61,7 +61,8 @@ public class MSPData implements Listener {
         ItemMeta came = cancel.getItemMeta();
         came.setDisplayName("§e§l作成をキャンセルする");
         List<String> camelo = new ArrayList<>();
-        camelo.add("§c作成をキャンセルします。※やり直しはできません！");
+        camelo.add("§c作成をキャンセルします。");
+        camelo.add("§c※やり直しはできません！");
         came.setLore(camelo);
         cancel.setItemMeta(came);
 

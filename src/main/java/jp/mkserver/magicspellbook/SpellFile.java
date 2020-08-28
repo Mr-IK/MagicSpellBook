@@ -141,4 +141,27 @@ public class SpellFile {
     public HashMap<ItemStack,Integer> getResultItems(){
         return resultItems;
     }
+
+    public void removeReqItem(ItemStack item){
+        requiredItems.remove(item);
+    }
+
+    public void addReqItem(ItemStack item){
+        removeReqItem(item);
+        requiredItems.add(item);
+    }
+
+    public void removeResultItem(ItemStack item){
+        resultItems.remove(item);
+    }
+
+    public void putResultItem(ItemStack item){
+        removeResultItem(item);
+        resultItems.put(item,0);
+    }
+
+    public void putResultItem(ItemStack item, int i){
+        removeResultItem(item);
+        resultItems.put(item,i);
+    }
 }

@@ -234,7 +234,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     if(item==null||item.getType()==Material.AIR){
                         return;
                     }
-                    sp.getRequiredItems().add(item);
+                    sp.addReqItem(item);
                     p.getInventory().setItem(e.getSlot(),null);
                     openReqItemSelect(p,inv,id,page);
                 }
@@ -313,7 +313,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     if(e.getClick()== ClickType.MIDDLE){
                         p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE,1.0f,0.9f);
                         MagicSpellBook.safeGiveItem(p,item);
-                        sp.getRequiredItems().remove(item);
+                        sp.removeReqItem(item);
                         openReqItemSelect(p,inv,id,page);
                     }
                 }
@@ -365,7 +365,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     if(item==null||item.getType()==Material.AIR){
                         return;
                     }
-                    sp.getResultItems().put(item,0);
+                    sp.putResultItem(item,0);
                     p.getInventory().setItem(e.getSlot(),null);
                     openResItemSelect(p,inv,id,page);
                 }
@@ -445,29 +445,29 @@ public class MSPCreator implements Listener, CommandExecutor {
                     super.unregister();
                     if(e.getClick()== ClickType.MIDDLE){
                         MagicSpellBook.safeGiveItem(p,item);
-                        sp.getResultItems().remove(item);
+                        sp.removeResultItem(item);
                         openResItemSelect(p,inv,id,page);
                         p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_DEATH,1.0f,0.9f);
                     }else if(e.getClick()== ClickType.LEFT||e.getClick()== ClickType.SHIFT_LEFT){
                         if(e.getClick()== ClickType.SHIFT_LEFT){
-                            sp.getResultItems().put(item,count+10);
+                            sp.putResultItem(item,count+10);
                         }else {
-                            sp.getResultItems().put(item, count+1);
+                            sp.putResultItem(item, count+1);
                         }
                         openResItemSelect(p,inv,id,page);
                         p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT,1.0f,0.9f);
                     }else if(e.getClick()== ClickType.RIGHT||e.getClick()== ClickType.SHIFT_RIGHT){
                         if(e.getClick()== ClickType.SHIFT_RIGHT){
                             if((count-10)<0){
-                                sp.getResultItems().put(item,0);
+                                sp.putResultItem(item,0);
                             }else{
-                                sp.getResultItems().put(item,count-10);
+                                sp.putResultItem(item,count-10);
                             }
                         }else {
                             if((count-1)<0){
-                                sp.getResultItems().put(citem,0);
+                                sp.putResultItem(item,0);
                             }else{
-                                sp.getResultItems().put(item, count-1);
+                                sp.putResultItem(item, count-1);
                             }
                         }
                         openResItemSelect(p,inv,id,page);
