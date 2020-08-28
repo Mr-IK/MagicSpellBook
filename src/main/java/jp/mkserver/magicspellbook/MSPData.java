@@ -148,7 +148,7 @@ public class MSPData implements Listener {
         NBTTagCompound nbttag = nmsItem.getTag();
         if(nbttag==null)return;
 
-        String dataid = nbttag.getString("MagicSpellBookData").replaceFirst("§kMSP:","");
+        String dataid = nbttag.getString("MagicSpellBookData").replaceFirst("MSP:","");
 
         if(!fileList.containsKey(dataid)){
             if(mgStats.containsKey(block.getLocation())) {
