@@ -129,10 +129,12 @@ public class InventoryAPI {
 
     //event regist and open inv
     public void openInv(Player p){
-        allListenerRegist(p);
         if(openType){
+            allListenerRegist(p);
             p.updateInventory();
         }else{
+            p.closeInventory();
+            allListenerRegist(p);
             p.openInventory(inv);
         }
         setOpenType(false);

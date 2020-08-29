@@ -534,6 +534,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 });
                 ii++;
             }
+
             inv.openInv(p);
         } else if (invname.equalsIgnoreCase("editexp")) {
             String id = args[0];
