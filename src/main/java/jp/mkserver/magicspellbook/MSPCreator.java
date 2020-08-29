@@ -314,7 +314,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     super.closeCheck(e);
                 }
             });
-            inv.setItem(12,inv.createUnbitem("§3§l詠唱設定",new String[]{"§e詠唱に関する設定をします"},
+            inv.setItem(12,inv.createUnbitem("§3§l詠唱設定",new String[]{"§e詠唱に関する設定を行います。"},
                     Material.PAPER,0,true));
             inv.addOriginalListing(new InvListener(plugin, inv){
                 @EventHandler
@@ -362,6 +362,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN,1.0f,1.0f);
+                    openGUI(p, inv, "editbook", new String[]{id});
                 }
                 @EventHandler
                 public void onClose(InventoryCloseEvent e){
@@ -628,6 +629,138 @@ public class MSPCreator implements Listener, CommandExecutor {
                                 sp.setTakeExp(0);
                             } else {
                                 sp.setTakeExp(sp.getTakeExp() - 1);
+                            }
+                        }
+                        openGUI(p, inv, "editexp", new String[]{id});
+                        p.playSound(p.getLocation(), Sound.ENTITY_ENDERMITE_HURT, 1.0f, 0.9f);
+                    }
+                }
+
+                @EventHandler
+                public void onClose(InventoryCloseEvent e) {
+                    super.closeCheck(e);
+                }
+            });
+            inv.setItem(18, inv.createUnbitem("§c§l戻る", new String[]{"§e前のページに戻ります。"},
+                    Material.DARK_OAK_DOOR, 0, false));
+            inv.addOriginalListing(new InvListener(plugin, inv) {
+                @EventHandler
+                public void onClick(InventoryClickEvent e) {
+                    if (!super.ClickCheck(e)) {
+                        return;
+                    }
+                    if (e.getSlot() != 18) {
+                        return;
+                    }
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
+                    e.setCancelled(true);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openGUI(p, inv, "editmain", new String[]{id});
+                }
+
+                @EventHandler
+                public void onClose(InventoryCloseEvent e) {
+                    super.closeCheck(e);
+                }
+            });
+            inv.openInv(p);
+        } else if (invname.equalsIgnoreCase("editbook")) {
+            String id = args[0];
+            inv = get3_9Inv(p, inv, MagicSpellBook.prefix + "§5§l本破壊設定");
+            SpellFile sp = MagicSpellBook.data.fileList.get(id);
+            inv.setItem(12, inv.createUnbitem("§2§l失敗時破壊確率設定",
+                    new String[]{"§c起動失敗時に本が消滅する可能性です！", "§c※100分の〇にセットします。", "§e通常/シフトクリックで数値をセット",
+                            "§e左: +1(シフトで+10) 右: -1(シフトで-10)", "§e§l現在: 100分の" + sp.getSbreakC()}, Material.TNT, 0, false));
+            inv.addOriginalListing(new InvListener(plugin, inv) {
+                @EventHandler
+                public void onClick(InventoryClickEvent e) {
+                    if (!super.ClickCheck(e)) {
+                        return;
+                    }
+                    if (e.getSlot() != 12) {
+                        return;
+                    }
+                    if (e.getClick() == ClickType.LEFT || e.getClick() == ClickType.SHIFT_LEFT) {
+                        if (e.getClick() == ClickType.SHIFT_LEFT) {
+                            if ((sp.getSbreakC() + 10) > 100) {
+                                sp.setSbreakC(100);
+                            }else {
+                                sp.setSbreakC(sp.getSbreakC() + 10);
+                            }
+                        } else {
+                            if ((sp.getSbreakC() + 1) > 100) {
+                                sp.setSbreakC(100);
+                            }else {
+                                sp.setSbreakC(sp.getSbreakC() + 1);
+                            }
+                        }
+                        openGUI(p, inv, "editbook", new String[]{id});
+                        p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.9f);
+                    } else if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT) {
+                        if (e.getClick() == ClickType.SHIFT_RIGHT) {
+                            if ((sp.getSbreakC() - 10) < 0) {
+                                sp.setSbreakC(0);
+                            } else {
+                                sp.setSbreakC(sp.getSbreakC()- 10);
+                            }
+                        } else {
+                            if ((sp.getSbreakC() - 1) < 0) {
+                                sp.setSbreakC(0);
+                            } else {
+                                sp.setSbreakC(sp.getSbreakC()- 1);
+                            }
+                        }
+                        openGUI(p, inv, "editbook", new String[]{id});
+                        p.playSound(p.getLocation(), Sound.ENTITY_ENDERMITE_HURT, 1.0f, 0.9f);
+                    }
+                }
+
+                @EventHandler
+                public void onClose(InventoryCloseEvent e) {
+                    super.closeCheck(e);
+                }
+            });
+            inv.setItem(12, inv.createUnbitem("§a§l成功時破壊確率設定",
+                    new String[]{"§e起動成功時に本が消滅する可能性です！", "§c※100分の〇にセットします。", "§e通常/シフトクリックで数値をセット",
+                            "§e左: +1(シフトで+10) 右: -1(シフトで-10)", "§e§l現在: 100分の" + sp.getBreakC()}, Material.TNT, 0, false));
+            inv.addOriginalListing(new InvListener(plugin, inv) {
+                @EventHandler
+                public void onClick(InventoryClickEvent e) {
+                    if (!super.ClickCheck(e)) {
+                        return;
+                    }
+                    if (e.getSlot() != 14) {
+                        return;
+                    }
+                    if (e.getClick() == ClickType.LEFT || e.getClick() == ClickType.SHIFT_LEFT) {
+                        if (e.getClick() == ClickType.SHIFT_LEFT) {
+                            if ((sp.getBreakC() + 10) > 100) {
+                                sp.setBreakC(100);
+                            }else {
+                                sp.setBreakC(sp.getBreakC() + 10);
+                            }
+                        } else {
+                            if ((sp.getBreakC() + 1) > 100) {
+                                sp.setBreakC(100);
+                            }else {
+                                sp.setBreakC(sp.getBreakC() + 1);
+                            }
+                        }
+                        openGUI(p, inv, "editexp", new String[]{id});
+                        p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.9f);
+                    } else if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT) {
+                        if (e.getClick() == ClickType.SHIFT_RIGHT) {
+                            if ((sp.getBreakC() - 10) < 0) {
+                                sp.setBreakC(0);
+                            } else {
+                                sp.setBreakC(sp.getBreakC()- 10);
+                            }
+                        } else {
+                            if ((sp.getBreakC() - 1) < 0) {
+                                sp.setBreakC(0);
+                            } else {
+                                sp.setBreakC(sp.getBreakC()- 1);
                             }
                         }
                         openGUI(p, inv, "editexp", new String[]{id});

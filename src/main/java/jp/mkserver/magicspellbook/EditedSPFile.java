@@ -13,9 +13,11 @@ public class EditedSPFile {
     public boolean power = false;
     public int requiredExp = 0;
     public int takeExp = 0;
+    public int breakC = 0;
+    public int sbreakC = 0;
     public HashMap<ItemStack,Integer> resultItems = new HashMap<>();
 
     public SpellFile createSpell(){
-        return new SpellFile(power,fileName,requiredItems,requiredExp,takeExp,resultItems);
+        return new SpellFile(power,fileName,requiredItems,requiredExp,takeExp,resultItems,breakC,sbreakC);
     }
 }

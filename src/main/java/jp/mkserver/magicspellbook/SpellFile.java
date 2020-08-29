@@ -15,6 +15,8 @@ public class SpellFile {
     private List<ItemStack> requiredItems;
     private int requiredExp;
     private int takeExp;
+    private int breakC;
+    private int sbreakC;
     private HashMap<ItemStack,Integer> resultItems;
 
     public SpellFile(String fileName) {
@@ -34,6 +36,10 @@ public class SpellFile {
 
         takeExp = yml.getInt("takeExp",0);
 
+        breakC = yml.getInt("breakc",0);
+
+        sbreakC = yml.getInt("sbreakc",0);
+
         requiredItems = (List<ItemStack>)yml.get("needItems");
 
         resultItems = new HashMap<>();
@@ -47,7 +53,7 @@ public class SpellFile {
         }
     }
 
-    public SpellFile(boolean power,String fileName,List<ItemStack> requiredItems,int requiredExp,int takeExp,HashMap<ItemStack,Integer> resultItems) {
+    public SpellFile(boolean power,String fileName,List<ItemStack> requiredItems,int requiredExp,int takeExp,HashMap<ItemStack,Integer> resultItems,int breakc,int sbreak) {
         //全データをインプットしファイルを作成するタイプ
         //※ゲーム内から新規にデータを作り、ファイルを作るための初期化メソッド
         this.fileName = fileName;
@@ -69,6 +75,8 @@ public class SpellFile {
         yml.set("needExp",requiredExp);
         yml.set("takeExp",takeExp);
         yml.set("needItems",requiredItems);
+        yml.set("breakc",breakc);
+        yml.set("sbreakc",sbreak);
 
         int co = 0;
         for(ItemStack item : resultItems.keySet()){
@@ -171,5 +179,21 @@ public class SpellFile {
     public void putResultItem(ItemStack item, int i){
         removeResultItem(item);
         resultItems.put(item,i);
+    }
+
+    public int getBreakC() {
+        return breakC;
+    }
+
+    public void setBreakC(int breakC) {
+        this.breakC = breakC;
+    }
+
+    public int getSbreakC() {
+        return sbreakC;
+    }
+
+    public void setSbreakC(int sbreakC) {
+        this.sbreakC = sbreakC;
     }
 }

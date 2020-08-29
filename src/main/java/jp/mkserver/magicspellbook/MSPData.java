@@ -17,10 +17,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static jp.mkserver.magicspellbook.MagicSpellBook.*;
 
@@ -204,9 +201,14 @@ public class MSPData implements Listener {
                         as.playSound(block.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,2.0f,0.5f);
                     }
                     block.getWorld().spawnParticle(Particle.SPELL_WITCH,block.getLocation(),20);
-                    p.sendActionBar("§c§l§oこの術式を起動するには経験値不足です。アイテムを返却します――");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
+                    if(unDamesi(100,file.getSbreakC())){
+                        p.sendActionBar("§c§l§o術式の失敗で魔術本が破損してしまったようだ。");
+                        lec.getInventory().setItem(0,new ItemStack(Material.AIR));
+                        p.playSound(block.getLocation(), Sound.ENTITY_ITEM_BREAK,2.0f,0.8f);
+                    }
+                    p.sendActionBar("§c§l§oこの術式を起動するには経験値不足です。アイテムを返却します――");
                     return;
                 }
 
@@ -218,6 +220,11 @@ public class MSPData implements Listener {
                     p.sendActionBar("§c§l§oこの術式を起動するのには素材不足です。アイテムを返却します――");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
+                    if(unDamesi(100,file.getSbreakC())){
+                        p.sendActionBar("§c§l§o術式の失敗で魔術本が破損してしまったようだ。");
+                        lec.getInventory().setItem(0,new ItemStack(Material.AIR));
+                        p.playSound(block.getLocation(), Sound.ENTITY_ITEM_BREAK,2.0f,0.8f);
+                    }
                     return;
                 }
                 mgs.chargeExp(true);
@@ -229,6 +236,11 @@ public class MSPData implements Listener {
                 }
                 block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),50);
                 p.sendActionBar("§a§l§o術式の起動に成功。");
+                if(unDamesi(100,file.getBreakC())){
+                    p.sendActionBar("§c§l§o術式の反動で魔術本が破損してしまったようだ。");
+                    lec.getInventory().setItem(0,new ItemStack(Material.AIR));
+                    p.playSound(block.getLocation(), Sound.ENTITY_ITEM_BREAK,2.0f,0.8f);
+                }
                 return;
             }
 
@@ -295,5 +307,15 @@ public class MSPData implements Listener {
         }
         data.fileList.remove(id);
         SpellBookFileManager.removeYMLFile(id);
+    }
+
+    public boolean unDamesi(int max,int aaa){
+        if(aaa==0){
+            return false;
+        }
+        Random rnd = new Random();
+        int aa = rnd.nextInt(max)+1;//1~100
+        ///aaa=10の場合10分の一
+        return aaa >= aa;
     }
 }
