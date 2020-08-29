@@ -2,9 +2,6 @@ package jp.mkserver.magicspellbook.inv;
 
 import jp.mkserver.magicspellbook.MagicSpellBook;
 import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle;
-import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_15_2;
-import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_16_1;
-import jp.mkserver.magicspellbook.inv.multiver.UpdateTitle_1_16_2;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -12,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
