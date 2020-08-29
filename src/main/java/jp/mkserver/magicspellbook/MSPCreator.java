@@ -721,9 +721,9 @@ public class MSPCreator implements Listener, CommandExecutor {
                     super.closeCheck(e);
                 }
             });
-            inv.setItem(12, inv.createUnbitem("§a§l成功時破壊確率設定",
+            inv.setItem(14, inv.createUnbitem("§a§l成功時破壊確率設定",
                     new String[]{"§e起動成功時に本が消滅する可能性です！", "§c※100分の〇にセットします。", "§e通常/シフトクリックで数値をセット",
-                            "§e左: +1(シフトで+10) 右: -1(シフトで-10)", "§e§l現在: 100分の" + sp.getBreakC()}, Material.TNT, 0, false));
+                            "§e左: +1(シフトで+10) 右: -1(シフトで-10)", "§e§l現在: 100分の" + sp.getBreakC()}, Material.ENDER_PEARL, 0, false));
             inv.addOriginalListing(new InvListener(plugin, inv) {
                 @EventHandler
                 public void onClick(InventoryClickEvent e) {
@@ -747,7 +747,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                                 sp.setBreakC(sp.getBreakC() + 1);
                             }
                         }
-                        openGUI(p, inv, "editexp", new String[]{id});
+                        openGUI(p, inv, "editbook", new String[]{id});
                         p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.9f);
                     } else if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT) {
                         if (e.getClick() == ClickType.SHIFT_RIGHT) {
@@ -763,7 +763,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                                 sp.setBreakC(sp.getBreakC()- 1);
                             }
                         }
-                        openGUI(p, inv, "editexp", new String[]{id});
+                        openGUI(p, inv, "editbook", new String[]{id});
                         p.playSound(p.getLocation(), Sound.ENTITY_ENDERMITE_HURT, 1.0f, 0.9f);
                     }
                 }
