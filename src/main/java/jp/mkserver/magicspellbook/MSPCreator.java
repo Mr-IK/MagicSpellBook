@@ -488,6 +488,162 @@ public class MSPCreator implements Listener, CommandExecutor {
         }
     }
 
+    public void openEditExp(Player p,InventoryAPI inv,String id){
+        boolean update = true;
+        if(inv==null||inv.getSize()!=27){
+            p.closeInventory();
+            inv = new InventoryAPI(MagicSpellBook.plugin,MagicSpellBook.prefix+"§5§l経験値設定画面",27);
+            update = false;
+        }else{
+            inv.allunregistRunnable();
+            inv.updateTitle(p,MagicSpellBook.prefix+"§5§l経験値設定画面");
+            inv.clear();
+        }
+        if(!MagicSpellBook.data.fileList.containsKey(id)){
+            return;
+        }
+        SpellFile sp = MagicSpellBook.data.fileList.get(id);
+        p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_BOTTLE_THROW,1.0f,1.1f);
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                e.setCancelled(true);
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        inv.setItem(12,inv.createUnbitem("§2§l§o必要経験値レベル設定",
+                new String[]{"§c起動時に必要な経験値レベルです！","§c※消費経験値レベルより下にはセットできません","§e通常/シフトクリックで数値をセット",
+                        "§e左: +1(シフトで+10) 右: -1(シフトで-10)","§e§l現在: "+sp.getRequiredExp()}, Material.ENCHANTING_TABLE,0,false));
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                if(e.getSlot()!=12){
+                    return;
+                }
+                if(e.getClick()== ClickType.LEFT||e.getClick()== ClickType.SHIFT_LEFT){
+                    if(e.getClick()== ClickType.SHIFT_LEFT){
+                        sp.setReqExp(sp.getRequiredExp()+10);
+                    }else {
+                        sp.setReqExp(sp.getRequiredExp()+1);
+                    }
+                    openEditExp(p,inv,id);
+                    p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT,1.0f,0.9f);
+                }else if(e.getClick()== ClickType.RIGHT||e.getClick()== ClickType.SHIFT_RIGHT){
+                    if(e.getClick()== ClickType.SHIFT_RIGHT){
+                        if((sp.getRequiredExp()-10)<sp.getTakeExp()){
+                            sp.setReqExp(sp.getTakeExp());
+                        }else if((sp.getRequiredExp()-10)<0){
+                            sp.setReqExp(0);
+                        }else{
+                            sp.setReqExp(sp.getRequiredExp()-10);
+                        }
+                    }else {
+                        if((sp.getRequiredExp()-1)<sp.getTakeExp()){
+                            sp.setReqExp(sp.getTakeExp());
+                        }if((sp.getRequiredExp()-1)<0){
+                            sp.setReqExp(0);
+                        }else{
+                            sp.setReqExp(sp.getRequiredExp()-1);
+                        }
+                    }
+                    openEditExp(p,inv,id);
+                    p.playSound(p.getLocation(), Sound.ENTITY_ENDERMITE_HURT,1.0f,0.9f);
+                }
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        inv.setItem(14,inv.createUnbitem("§a§l§o消費経験値レベル設定",
+                new String[]{"§c起動時に消費する経験値レベルです！","§c※必要経験値レベルより上にはセットできません","§e通常/シフトクリックで数値をセット",
+                        "§e左: +1(シフトで+10) 右: -1(シフトで-10)","§e§l現在: "+sp.getTakeExp()}, Material.EXPERIENCE_BOTTLE,0,false));
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                if(e.getSlot()!=14){
+                    return;
+                }
+                if(e.getClick()== ClickType.LEFT||e.getClick()== ClickType.SHIFT_LEFT){
+                    if(e.getClick()== ClickType.SHIFT_LEFT){
+                        if((sp.getTakeExp()+10)>sp.getRequiredExp()){
+                            sp.setTakeExp(sp.getRequiredExp());
+                        }else{
+                            sp.setTakeExp(sp.getTakeExp()+10);
+                        }
+                    }else {
+                        if((sp.getTakeExp()+1)>sp.getRequiredExp()){
+                            sp.setTakeExp(sp.getRequiredExp());
+                        }else{
+                            sp.setTakeExp(sp.getTakeExp()+1);
+                        }
+                    }
+                    openEditExp(p,inv,id);
+                    p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT,1.0f,0.9f);
+                }else if(e.getClick()== ClickType.RIGHT||e.getClick()== ClickType.SHIFT_RIGHT){
+                    if(e.getClick()== ClickType.SHIFT_RIGHT){
+                        if((sp.getTakeExp()-10)<0){
+                            sp.setTakeExp(0);
+                        }else{
+                            sp.setTakeExp(sp.getTakeExp()-10);
+                        }
+                    }else {
+                        if((sp.getTakeExp()-1)<0){
+                            sp.setTakeExp(0);
+                        }else{
+                            sp.setTakeExp(sp.getTakeExp()-1);
+                        }
+                    }
+                    openEditExp(p,inv,id);
+                    p.playSound(p.getLocation(), Sound.ENTITY_ENDERMITE_HURT,1.0f,0.9f);
+                }
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        inv.setItem(18,inv.createUnbitem("§c§l戻る",new String[]{"§e前のページに戻ります。"},
+                Material.DARK_OAK_DOOR,0,false));
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                if(e.getSlot()!=18){
+                    return;
+                }
+                p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
+                e.setCancelled(true);
+                super.inv.regenerateID();
+                super.unregister();
+                openEditGUIMain(p,inv,id);
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        if(update){
+            inv.refresh(p);
+        }else{
+            inv.openInv(p);
+        }
+    }
+
     public void openAdminGUIMain(Player p,InventoryAPI inv){
         boolean update = true;
         if(inv==null||inv.getSize()!=27){
@@ -641,10 +797,10 @@ public class MSPCreator implements Listener, CommandExecutor {
         ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
         inv.fillInv(wall);
         if(sp.isPower()){
-            inv.setItem(4,inv.createUnbitem("§a§l稼働設定",new String[]{"§2このシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+            inv.setItem(4,inv.createUnbitem("§a§l稼働設定: 現在ON",new String[]{"§2このシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
                     Material.EMERALD_BLOCK,0,false));
         }else{
-            inv.setItem(4,inv.createUnbitem("§4§l稼働設定",new String[]{"§cこのシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+            inv.setItem(4,inv.createUnbitem("§4§l稼働設定: 現在OFF",new String[]{"§cこのシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
                     Material.REDSTONE_BLOCK,0,false));
         }
         inv.addOriginalListing(new InvListener(plugin, inv){
@@ -659,11 +815,11 @@ public class MSPCreator implements Listener, CommandExecutor {
                 p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_FALL,1.0f,0.7f);
                 e.setCancelled(true);
                 if(!sp.isPower()){
-                    inv.setItem(4,inv.createUnbitem("§a§l稼働設定",new String[]{"§2このシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+                    inv.setItem(4,inv.createUnbitem("§a§l稼働設定: 現在ON",new String[]{"§2このシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
                             Material.EMERALD_BLOCK,0,false));
                     sp.setPower(true);
                 }else{
-                    inv.setItem(4,inv.createUnbitem("§4§l稼働設定",new String[]{"§cこのシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
+                    inv.setItem(4,inv.createUnbitem("§4§l稼働設定: 現在OFF",new String[]{"§cこのシステムの稼働状態を切り替えます。","§eクリックで切り替えます。"},
                             Material.REDSTONE_BLOCK,0,false));
                     sp.setPower(false);
                 }
@@ -711,7 +867,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 e.setCancelled(true);
                 super.inv.regenerateID();
                 super.unregister();
-                p.closeInventory();
+                openEditExp(p,inv,id);
             }
             @EventHandler
             public void onClose(InventoryCloseEvent e){

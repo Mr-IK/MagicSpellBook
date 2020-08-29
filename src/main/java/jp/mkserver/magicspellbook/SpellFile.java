@@ -130,6 +130,14 @@ public class SpellFile {
         return takeExp;
     }
 
+    public void setTakeExp(int exp){
+        this.takeExp = exp;
+    }
+
+    public void setReqExp(int exp){
+        this.requiredExp = exp;
+    }
+
     public boolean isPower() {
         return power;
     }
