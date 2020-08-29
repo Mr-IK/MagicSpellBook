@@ -37,7 +37,7 @@ public class InventoryAPI {
     protected Inventory inv;
     private final int size;
     private UUID uniqueInventoryID;
-    private UUID nowOpenUserID = null;
+    private boolean openType = false;
     private ArrayList<InvListener> listeners;
     private ArrayList<InvListener> nowRunnable;
     private String name;
@@ -129,22 +129,13 @@ public class InventoryAPI {
 
     //event regist and open inv
     public void openInv(Player p){
-        addOriginalListing(new InvListener(plugin, this){
-            @EventHandler
-            public void onClose(InventoryCloseEvent e){
-                super.closeCheck(e);
-                if(e.getPlayer().getUniqueId()==player){
-                    nowOpenUserID = null;
-                }
-            }
-        });
         allListenerRegist(p);
-        if(nowOpenUserID==null){
-            p.openInventory(inv);
-            nowOpenUserID = p.getUniqueId();
-        }else{
+        if(openType){
             p.updateInventory();
+        }else{
+            p.openInventory(inv);
         }
+        setOpenType(false);
     }
 
     public void copyFromOtherInvAPI(InventoryAPI inv){
@@ -344,5 +335,13 @@ public class InventoryAPI {
 
     public String getSimpleTitle() {
         return simpleTitle;
+    }
+
+    public boolean isOpenType() {
+        return openType;
+    }
+
+    public void setOpenType(boolean openType) {
+        this.openType = openType;
     }
 }

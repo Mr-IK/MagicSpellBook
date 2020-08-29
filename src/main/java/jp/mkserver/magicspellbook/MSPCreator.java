@@ -51,6 +51,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             });
             ItemStack wall = invs.createUnbitem(" ", new String[]{}, Material.BLACK_STAINED_GLASS_PANE, 0, false);
             invs.fillInv(wall);
+            invs.setOpenType(true);
             return invs;
         }else {
             InventoryAPI inv = new InventoryAPI(plugin, name, 27);
@@ -94,6 +95,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     super.closeCheck(e);
                 }
             });
+            invs.setOpenType(true);
             return invs;
         }else {
             InventoryAPI inv = new InventoryAPI(plugin, name, 54);
@@ -461,7 +463,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
-                    openGUI(p, null, "main", new String[]{});
+                    openGUI(p, inv, "main", new String[]{});
                 }
 
                 @EventHandler
