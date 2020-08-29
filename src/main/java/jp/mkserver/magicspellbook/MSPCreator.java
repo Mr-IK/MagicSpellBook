@@ -2,6 +2,7 @@ package jp.mkserver.magicspellbook;
 
 import jp.mkserver.magicspellbook.inv.InvListener;
 import jp.mkserver.magicspellbook.inv.InventoryAPI;
+import jp.mkserver.magicspellbook.inv.InventoryPattern;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Material;
@@ -27,9 +28,69 @@ public class MSPCreator implements Listener, CommandExecutor {
 
     HashMap<UUID, EditedSPFile> noEdited = new HashMap<>();
     private final MagicSpellBook plugin;
+    private InventoryPattern invPat;
 
     public MSPCreator(MagicSpellBook plugin){
         this.plugin = plugin;
+        invPat = new InventoryPattern(plugin);
+        inputInvPattern();
+    }
+
+    private void inputInvPattern(){
+        input3_9Inv();
+        input6_9Inv();
+        inputListupInv();
+    }
+
+    private void input3_9Inv(){
+        InventoryAPI inv = new InventoryAPI(plugin,"3x9型インベントリ雛形",27);
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                e.setCancelled(true);
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        inv.fillInv(wall);
+        invPat.putInv("3_9",inv);
+    }
+
+    private void input6_9Inv(){
+        InventoryAPI inv = new InventoryAPI(plugin,"6x9型インベントリ雛形",54);
+        inv.addOriginalListing(new InvListener(plugin, inv){
+            @EventHandler
+            public void onClick(InventoryClickEvent e){
+                if(!super.ClickCheck(e)){
+                    return;
+                }
+                e.setCancelled(true);
+            }
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+            }
+        });
+        invPat.putInv("6_9",inv);
+    }
+
+    private void inputListupInv(){
+        InventoryAPI inv = invPat.copyInv("6_9","リストアップインベントリ雛形");
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        ItemStack back = inv.createUnbitem("§f§l§o前のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        ItemStack walk = inv.createUnbitem("§f§l§o次のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
+        inv.setItems(new int[]{45,46},back);
+        inv.setItems(new int[]{47,48,50,51},wall);
+        inv.setItems(new int[]{52,53},walk);
+        inv.setItem(49,inv.createUnbitem("§c§l戻る",new String[]{"§e前のページに戻ります。"},
+                Material.DARK_OAK_DOOR,0,false));
+        invPat.putInv("list",inv);
     }
 
 
@@ -46,7 +107,8 @@ public class MSPCreator implements Listener, CommandExecutor {
         }
 
         if(args.length==0){
-            openAdminGUIMain(p,null);
+            openGUI(p,null,"main",new String[]{});
+            // openAdminGUIMain(p,null);
             return true;
         }else if(args.length==1){
             if(data.fileList.containsKey(args[0])){
@@ -71,6 +133,80 @@ public class MSPCreator implements Listener, CommandExecutor {
         }
         p.sendMessage(MagicSpellBook.prefix+"§e/msp");
         return true;
+    }
+
+    public void openGUI(Player p,InventoryAPI inv,String invname,String[] args){
+
+        if(invname.equalsIgnoreCase("main")){
+            inv = invPat.overWriteInv(p,inv,MagicSpellBook.prefix+"§5§l管理画面 §9§l―メイン―","3_9");
+            inv.setItem(11,inv.createUnbitem("§a§l新規作成",new String[]{"§e一から魔法パターンを作成します。"},
+                    Material.WRITABLE_BOOK,0,false));
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(e.getSlot()!=11){
+                        return;
+                    }
+                    p.playSound(p.getLocation(), Sound.BLOCK_CHEST_OPEN,1.0f,1.0f);
+                    e.setCancelled(true);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openCreateGUIStart(p);
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            inv.setItem(13,inv.createUnbitem("§b§l編集・削除",new String[]{"§e作成済みの魔法パターンを編集・削除します。"},
+                    Material.WRITTEN_BOOK,0,false));
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(e.getSlot()!=13){
+                        return;
+                    }
+                    p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE,1.0f,1.0f);
+                    e.setCancelled(true);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    openEditGUISelect(p,inv,0);
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            inv.setItem(15,inv.createUnbitem("§6§l特殊書見台設定",new String[]{"§e特殊書見台の作成や編集を行います。"},
+                    Material.LECTERN,0,false));
+            inv.addOriginalListing(new InvListener(plugin, inv){
+                @EventHandler
+                public void onClick(InventoryClickEvent e){
+                    if(!super.ClickCheck(e)){
+                        return;
+                    }
+                    if(e.getSlot()!=15){
+                        return;
+                    }
+                    p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN,1.0f,1.0f);
+                    e.setCancelled(true);
+                    super.inv.regenerateID();
+                    super.unregister();
+                    p.closeInventory();
+                }
+                @EventHandler
+                public void onClose(InventoryCloseEvent e){
+                    super.closeCheck(e);
+                }
+            });
+            inv.openInv(p);
+        }
     }
 
     public void openEditGUISelect(Player p,InventoryAPI inv, int page){
@@ -193,11 +329,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             });
             ii++;
         }
-        if(update){
-            inv.refresh(p);
-        }else{
-            inv.openInv(p);
-        }
+        inv.openInv(p);
     }
 
     public void openReqItemSelect(Player p,InventoryAPI inv, String id,int page){
@@ -324,11 +456,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             });
             ii++;
         }
-        if(update){
-            inv.refresh(p);
-        }else{
-            inv.openInv(p);
-        }
+        inv.openInv(p);
     }
 
     public void openResItemSelect(Player p,InventoryAPI inv, String id,int page){
@@ -481,11 +609,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             });
             ii++;
         }
-        if(update){
-            inv.refresh(p);
-        }else{
-            inv.openInv(p);
-        }
+        inv.openInv(p);
     }
 
     public void openEditExp(Player p,InventoryAPI inv,String id){
@@ -639,11 +763,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        if(update){
-            inv.refresh(p);
-        }else{
-            inv.openInv(p);
-        }
+        inv.openInv(p);
     }
 
     public void openAdminGUIMain(Player p,InventoryAPI inv){
@@ -739,11 +859,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        if(update){
-            inv.refresh(p);
-        }else{
-            inv.openInv(p);
-        }
+        inv.openInv(p);
     }
 
     public void openCreateGUIStart(Player p){
@@ -1029,11 +1145,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        if(update){
-            inv.refresh(p);
-        }else{
-            inv.openInv(p);
-        }
+        inv.openInv(p);
     }
 
     public void openConfirmGUI(Player p,InventoryAPI inv, String id, String type){
@@ -1107,11 +1219,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     super.closeCheck(e);
                 }
             });
-            if(update){
-                inv.refresh(p);
-            }else{
-                inv.openInv(p);
-            }
+            inv.openInv(p);
             return;
         }
         openEditGUIMain(p,inv,id);

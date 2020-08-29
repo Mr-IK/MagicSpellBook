@@ -37,9 +37,11 @@ public class InventoryAPI {
     protected Inventory inv;
     private final int size;
     private UUID uniqueInventoryID;
-    private final ArrayList<InvListener> listeners;
+    private UUID nowOpenUserID = null;
+    private ArrayList<InvListener> listeners;
     private ArrayList<InvListener> nowRunnable;
     private String name;
+    private String simpleTitle;
     private UpdateTitle updateTitle;
 
 
@@ -50,15 +52,36 @@ public class InventoryAPI {
         uniqueInventoryID = UUID.randomUUID();
         inv = Bukkit.getServer().createInventory(null, size, getInvUniqueID()+name);
         this.name = getInvUniqueID()+name;
+        this.simpleTitle = name;
         listeners = new ArrayList<>();
         nowRunnable = new ArrayList<>();
         updateTitle = MagicSpellBook.updateTitle;
     }
 
-    //updated inv
-    public void refresh(Player p){
-        allListenerRegist(p);
-        p.updateInventory();
+    //init copy renamed inventory
+    public InventoryAPI(JavaPlugin plugin,InventoryAPI invs,String name){
+        this.size = invs.getSize();
+        this.plugin = plugin;
+        uniqueInventoryID = UUID.randomUUID();
+        inv = Bukkit.getServer().createInventory(null, size, getInvUniqueID()+name);
+        inputItemFromInventory(invs.inv);
+        this.name = getInvUniqueID()+invs.getSimpleTitle();
+        listeners = new ArrayList<>(invs.listeners);
+        nowRunnable = new ArrayList<>();
+        updateTitle = MagicSpellBook.updateTitle;
+    }
+
+    //init copy inventory
+    public InventoryAPI(JavaPlugin plugin,InventoryAPI invs){
+        this.size = invs.getSize();
+        this.plugin = plugin;
+        uniqueInventoryID = UUID.randomUUID();
+        inv = Bukkit.getServer().createInventory(null, size, getInvUniqueID()+invs.getSimpleTitle());
+        inputItemFromInventory(invs.inv);
+        this.name = getInvUniqueID()+invs.getSimpleTitle();
+        listeners = new ArrayList<>(invs.listeners);
+        nowRunnable = new ArrayList<>();
+        updateTitle = MagicSpellBook.updateTitle;
     }
 
     //String message hideen
@@ -91,10 +114,6 @@ public class InventoryAPI {
         return hideString(getUniqueInventoryID().toString());
     }
 
-    //reseting inventory instance
-    public void resetInv() {
-        inv = Bukkit.getServer().createInventory(null, size, getInvUniqueID()+name);
-    }
 
     //inv fill item
     public void fillInv(ItemStack item){
@@ -110,8 +129,34 @@ public class InventoryAPI {
 
     //event regist and open inv
     public void openInv(Player p){
+        if(nowOpenUserID!=null&&nowOpenUserID!=p.getUniqueId()){
+            return;
+        }
+        addOriginalListing(new InvListener(plugin, this){
+            @EventHandler
+            public void onClose(InventoryCloseEvent e){
+                super.closeCheck(e);
+                if(e.getPlayer().getUniqueId()==player){
+                    nowOpenUserID = null;
+                }
+            }
+        });
         allListenerRegist(p);
-        p.openInventory(inv);
+        if(nowOpenUserID==null){
+            p.openInventory(inv);
+            nowOpenUserID = p.getUniqueId();
+        }else{
+            p.updateInventory();
+        }
+    }
+
+    public void copyFromOtherInvAPI(InventoryAPI inv){
+        inv.regenerateID();
+        inv.allunregistRunnable();
+        inv.clear();
+        listeners = new ArrayList<>(inv.listeners);
+        nowRunnable = new ArrayList<>();
+        inputItemFromInventory(inv.inv);
     }
 
     //event regist
@@ -150,6 +195,7 @@ public class InventoryAPI {
         if(updateTitle != null){
             updateTitle.sendTitleChangePacket(p,getInvUniqueID()+title,inv);
         }
+        this.simpleTitle = title;
         this.name = getInvUniqueID()+title;
     }
 
@@ -299,4 +345,7 @@ public class InventoryAPI {
         return items;
     }
 
+    public String getSimpleTitle() {
+        return simpleTitle;
+    }
 }
