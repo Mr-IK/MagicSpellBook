@@ -26,7 +26,6 @@ import static jp.mkserver.magicspellbook.MagicSpellBook.prefix;
 
 public class MSPCreator implements Listener, CommandExecutor {
 
-    HashMap<UUID, EditedSPFile> noEdited = new HashMap<>();
     private final MagicSpellBook plugin;
     private InventoryPattern invPat;
 
@@ -137,8 +136,17 @@ public class MSPCreator implements Listener, CommandExecutor {
 
     public void openGUI(Player p,InventoryAPI inv,String invname,String[] args) {
 
+        if(inv!=null){
+            inv.regenerateID();
+            inv.allunregistRunnable();
+            p.closeInventory();
+        }
+
         if (invname.equalsIgnoreCase("main")) {
             inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l管理画面 §9§l―メイン―", "3_9");
+            if(inv==null){
+                inv = invPat.copyInv("3_9",MagicSpellBook.prefix + "§5§l管理画面 §9§l―メイン―");
+            }
             inv.setItem(11, inv.createUnbitem("§a§l新規作成", new String[]{"§e一から魔法パターンを作成します。"},
                     Material.WRITABLE_BOOK, 0, false));
             inv.addOriginalListing(new InvListener(plugin, inv) {
@@ -202,6 +210,9 @@ public class MSPCreator implements Listener, CommandExecutor {
         } else if (invname.equalsIgnoreCase("editmain")) {
             String id = args[0];
             inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix+"§5§l編集画面 §9§l―"+id+"―", "3_9");
+            if(inv==null){
+                inv = invPat.copyInv("3_9",MagicSpellBook.prefix+"§5§l編集画面 §9§l―"+id+"―");
+            }
             if(!MagicSpellBook.data.fileList.containsKey(id)){
                 return;
             }
@@ -251,10 +262,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.BLOCK_CHEST_OPEN,1.0f,1.0f);
-                    e.setCancelled(true);
-                    super.inv.regenerateID();
-                    super.unregister();
-                    p.closeInventory();
                     openGUI(p,inv,"editreq",new String[]{id,""+0});
                 }
                 @EventHandler
@@ -274,9 +281,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,1.0f,1.0f);
-                    e.setCancelled(true);
-                    super.inv.regenerateID();
-                    super.unregister();
                     openGUI(p,inv,"editexp",new String[]{id});
                 }
                 @EventHandler
@@ -296,7 +300,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN,1.0f,1.0f);
-                    e.setCancelled(true);
                 }
                 @EventHandler
                 public void onClose(InventoryCloseEvent e){
@@ -315,10 +318,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP,1.0f,1.0f);
-                    e.setCancelled(true);
-                    super.inv.regenerateID();
-                    super.unregister();
-                    p.closeInventory();
                 }
                 @EventHandler
                 public void onClose(InventoryCloseEvent e){
@@ -337,10 +336,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN,1.0f,1.0f);
-                    e.setCancelled(true);
-                    super.inv.regenerateID();
-                    super.unregister();
-                    p.closeInventory();
                 }
                 @EventHandler
                 public void onClose(InventoryCloseEvent e){
@@ -359,10 +354,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.0f);
-                    e.setCancelled(true);
-                    super.inv.regenerateID();
-                    super.unregister();
-                    p.closeInventory();
                     openGUI(p,inv,"editres",new String[]{id,""+0});
                 }
                 @EventHandler
@@ -382,10 +373,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                         return;
                     }
                     p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.0f);
-                    e.setCancelled(true);
-                    super.inv.regenerateID();
-                    super.unregister();
-                    p.closeInventory();
                 }
                 @EventHandler
                 public void onClose(InventoryCloseEvent e){
@@ -405,9 +392,6 @@ public class MSPCreator implements Listener, CommandExecutor {
                     }
                     sp.saveYML();
                     p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK,1.0f,1.2f);
-                    e.setCancelled(true);
-                    super.inv.regenerateID();
-                    super.unregister();
                     openGUI(p,inv,"main",new String[]{});
                 }
                 @EventHandler
@@ -443,6 +427,9 @@ public class MSPCreator implements Listener, CommandExecutor {
             int page = Integer.parseInt(args[0]);
 
             inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l管理画面 §9Page:" + page, "list");
+            if(inv==null){
+                inv = invPat.copyInv("list",MagicSpellBook.prefix + "§5§l管理画面 §9Page:" + page);
+            }
             inv.addOriginalListing(new InvListener(plugin, inv) {
                 @EventHandler
                 public void onClick(InventoryClickEvent e) {
@@ -528,9 +515,10 @@ public class MSPCreator implements Listener, CommandExecutor {
         } else if (invname.equalsIgnoreCase("editexp")) {
             String id = args[0];
             inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l経験値設定画面", "3_9");
+            if(inv==null){
+                inv = invPat.copyInv("3_9",MagicSpellBook.prefix + "§5§l経験値設定画面");
+            }
             SpellFile sp = MagicSpellBook.data.fileList.get(id);
-            ItemStack wall = inv.createUnbitem(" ", new String[]{}, Material.BLACK_STAINED_GLASS_PANE, 0, false);
-            inv.fillInv(wall);
             inv.setItem(12, inv.createUnbitem("§2§l必要経験値レベル設定",
                     new String[]{"§c起動時に必要な経験値レベルです！", "§c※消費経験値レベルより下にはセットできません", "§e通常/シフトクリックで数値をセット",
                             "§e左: +1(シフトで+10) 右: -1(シフトで-10)", "§e§l現在: " + sp.getRequiredExp()}, Material.ENCHANTING_TABLE, 0, false));
@@ -780,6 +768,9 @@ public class MSPCreator implements Listener, CommandExecutor {
             String id = args[0];
             int page = Integer.parseInt(args[1]);
             inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l報酬アイテム管理 §9Page:" + page, "list");
+            if(inv==null){
+                inv = invPat.copyInv("list",MagicSpellBook.prefix + "§5§l報酬アイテム管理 §9Page:" + page);
+            }
             if (!MagicSpellBook.data.fileList.containsKey(id)) {
                 return;
             }
@@ -916,6 +907,10 @@ public class MSPCreator implements Listener, CommandExecutor {
             }
             inv.openInv(p);
         } else if (invname.equalsIgnoreCase("confirm")) {
+            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix+"§5§l確認画面", "3_9");
+            if(inv==null){
+                inv = invPat.copyInv("3_9",MagicSpellBook.prefix+"§5§l確認画面");
+            }
             String id = args[0];
             String type = args[1];
             if(type.equalsIgnoreCase("delete")){

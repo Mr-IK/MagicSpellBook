@@ -1,9 +1,10 @@
 package jp.mkserver.magicspellbook.inv;
 
-import jp.mkserver.magicspellbook.MagicSpellBook;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class InventoryPattern {
@@ -32,7 +33,7 @@ public class InventoryPattern {
         return invs.containsKey(id);
     }
 
-    public InventoryAPI getInv(String id) {
+    private InventoryAPI getInv(String id) {
         return invs.get(id);
     }
 
@@ -40,38 +41,43 @@ public class InventoryPattern {
         if(!containInv(id)){
             return null;
         }
-        return new InventoryAPI(plugin,invs.get(id));
+        return new InventoryAPI(plugin,getInv(id));
     }
 
     public InventoryAPI copyInv(String id,String newName){
         if(!containInv(id)){
             return null;
         }
-        return new InventoryAPI(plugin,invs.get(id),newName);
+        return new InventoryAPI(plugin,getInv(id),newName);
     }
 
-    public InventoryAPI overWriteInv(Player p, InventoryAPI inv, String newTitle, String type){
-        if(type==null) {
+    public InventoryAPI overWriteInv(Player p, InventoryAPI inv, String newTitle, String type) {
+        Bukkit.getLogger().info(type+": "+ Arrays.toString(getInv(type).inv.getContents()));
+        if (type == null) {
             return null;
-        }else if(inv==null||inv.getSize()!=invs.get(type).getSize()){
+        } else if (inv == null) {
             p.closeInventory();
-            return copyInv(type,newTitle);
-        }else{
-            inv.copyFromOtherInvAPI(invs.get(type));
+            return null;
+        } else if (inv.getSize() != getInv(type).getSize()) {
+            inv.regenerateID();
+            inv.allunregistRunnable();
+            p.closeInventory();
+            return null;
+        } else {
             inv.updateTitle(p,newTitle);
+            inv.copyFromOtherInvAPI(getInv(type));
             return inv;
         }
     }
-
 
     public InventoryAPI overWriteInv(Player p, InventoryAPI inv, String newTitle, int size){
         if(inv==null||inv.getSize()!=size){
             p.closeInventory();
             return new InventoryAPI(plugin,newTitle,size);
         }else{
+            inv.updateTitle(p,newTitle);
             inv.regenerateID();
             inv.allunregistRunnable();
-            inv.updateTitle(p,newTitle);
             inv.clear();
             return inv;
         }

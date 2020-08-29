@@ -129,9 +129,6 @@ public class InventoryAPI {
 
     //event regist and open inv
     public void openInv(Player p){
-        if(nowOpenUserID!=null&&nowOpenUserID!=p.getUniqueId()){
-            return;
-        }
         addOriginalListing(new InvListener(plugin, this){
             @EventHandler
             public void onClose(InventoryCloseEvent e){
