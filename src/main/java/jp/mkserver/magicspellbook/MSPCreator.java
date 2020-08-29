@@ -517,7 +517,9 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        inv.setItem(12,inv.createUnbitem("§2§l§o必要経験値レベル設定",
+        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
+        inv.fillInv(wall);
+        inv.setItem(12,inv.createUnbitem("§2§l必要経験値レベル設定",
                 new String[]{"§c起動時に必要な経験値レベルです！","§c※消費経験値レベルより下にはセットできません","§e通常/シフトクリックで数値をセット",
                         "§e左: +1(シフトで+10) 右: -1(シフトで-10)","§e§l現在: "+sp.getRequiredExp()}, Material.ENCHANTING_TABLE,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
@@ -549,7 +551,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                     }else {
                         if((sp.getRequiredExp()-1)<sp.getTakeExp()){
                             sp.setReqExp(sp.getTakeExp());
-                        }if((sp.getRequiredExp()-1)<0){
+                        }else if((sp.getRequiredExp()-1)<0){
                             sp.setReqExp(0);
                         }else{
                             sp.setReqExp(sp.getRequiredExp()-1);
@@ -564,7 +566,7 @@ public class MSPCreator implements Listener, CommandExecutor {
                 super.closeCheck(e);
             }
         });
-        inv.setItem(14,inv.createUnbitem("§a§l§o消費経験値レベル設定",
+        inv.setItem(14,inv.createUnbitem("§a§l消費経験値レベル設定",
                 new String[]{"§c起動時に消費する経験値レベルです！","§c※必要経験値レベルより上にはセットできません","§e通常/シフトクリックで数値をセット",
                         "§e左: +1(シフトで+10) 右: -1(シフトで-10)","§e§l現在: "+sp.getTakeExp()}, Material.EXPERIENCE_BOTTLE,0,false));
         inv.addOriginalListing(new InvListener(plugin, inv){
