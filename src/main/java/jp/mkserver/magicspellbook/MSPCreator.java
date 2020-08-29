@@ -2,7 +2,6 @@ package jp.mkserver.magicspellbook;
 
 import jp.mkserver.magicspellbook.inv.InvListener;
 import jp.mkserver.magicspellbook.inv.InventoryAPI;
-import jp.mkserver.magicspellbook.inv.InventoryPattern;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Material;
@@ -18,8 +17,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
-import java.util.HashMap;
-import java.util.UUID;
 
 import static jp.mkserver.magicspellbook.MagicSpellBook.data;
 import static jp.mkserver.magicspellbook.MagicSpellBook.prefix;
@@ -27,60 +24,99 @@ import static jp.mkserver.magicspellbook.MagicSpellBook.prefix;
 public class MSPCreator implements Listener, CommandExecutor {
 
     private final MagicSpellBook plugin;
-    private InventoryPattern invPat;
 
     public MSPCreator(MagicSpellBook plugin){
         this.plugin = plugin;
-        invPat = new InventoryPattern(plugin);
-        inputInvPattern();
     }
 
-    private void inputInvPattern(){
-        input3_9Inv();
-        input6_9Inv();
-        inputListupInv();
-    }
-
-    private void input3_9Inv(){
-        InventoryAPI inv = new InventoryAPI(plugin,"3x9型インベントリ雛形",27);
-        inv.addOriginalListing(new InvListener(plugin, inv){
-            @EventHandler
-            public void onClick(InventoryClickEvent e){
-                if(!super.ClickCheck(e)){
-                    return;
+    private InventoryAPI get3_9Inv(Player p,InventoryAPI invs,String name){
+        if(invs!=null&&invs.getSize()==27){
+            invs.regenerateID();
+            invs.allunregistRunnable();
+            invs.updateTitle(p,name);
+            invs.clear();
+            invs.addOriginalListing(new InvListener(plugin, invs) {
+                @EventHandler
+                public void onClick(InventoryClickEvent e) {
+                    if (!super.ClickCheck(e)) {
+                        return;
+                    }
+                    e.setCancelled(true);
                 }
-                e.setCancelled(true);
-            }
-            @EventHandler
-            public void onClose(InventoryCloseEvent e){
-                super.closeCheck(e);
-            }
-        });
-        ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
-        inv.fillInv(wall);
-        invPat.putInv("3_9",inv);
-    }
 
-    private void input6_9Inv(){
-        InventoryAPI inv = new InventoryAPI(plugin,"6x9型インベントリ雛形",54);
-        inv.addOriginalListing(new InvListener(plugin, inv){
-            @EventHandler
-            public void onClick(InventoryClickEvent e){
-                if(!super.ClickCheck(e)){
-                    return;
+                @EventHandler
+                public void onClose(InventoryCloseEvent e) {
+                    super.closeCheck(e);
                 }
-                e.setCancelled(true);
-            }
-            @EventHandler
-            public void onClose(InventoryCloseEvent e){
-                super.closeCheck(e);
-            }
-        });
-        invPat.putInv("6_9",inv);
+            });
+            ItemStack wall = invs.createUnbitem(" ", new String[]{}, Material.BLACK_STAINED_GLASS_PANE, 0, false);
+            invs.fillInv(wall);
+            return invs;
+        }else {
+            InventoryAPI inv = new InventoryAPI(plugin, name, 27);
+            inv.addOriginalListing(new InvListener(plugin, inv) {
+                @EventHandler
+                public void onClick(InventoryClickEvent e) {
+                    if (!super.ClickCheck(e)) {
+                        return;
+                    }
+                    e.setCancelled(true);
+                }
+
+                @EventHandler
+                public void onClose(InventoryCloseEvent e) {
+                    super.closeCheck(e);
+                }
+            });
+            ItemStack wall = inv.createUnbitem(" ", new String[]{}, Material.BLACK_STAINED_GLASS_PANE, 0, false);
+            inv.fillInv(wall);
+            return inv;
+        }
     }
 
-    private void inputListupInv(){
-        InventoryAPI inv = invPat.copyInv("6_9","リストアップインベントリ雛形");
+    private InventoryAPI get6_9Inv(Player p,InventoryAPI invs,String name){
+        if(invs!=null&&invs.getSize()==54){
+            invs.regenerateID();
+            invs.allunregistRunnable();
+            invs.updateTitle(p,name);
+            invs.clear();
+            invs.addOriginalListing(new InvListener(plugin, invs) {
+                @EventHandler
+                public void onClick(InventoryClickEvent e) {
+                    if (!super.ClickCheck(e)) {
+                        return;
+                    }
+                    e.setCancelled(true);
+                }
+
+                @EventHandler
+                public void onClose(InventoryCloseEvent e) {
+                    super.closeCheck(e);
+                }
+            });
+            return invs;
+        }else {
+            InventoryAPI inv = new InventoryAPI(plugin, name, 54);
+            inv.addOriginalListing(new InvListener(plugin, inv) {
+                @EventHandler
+                public void onClick(InventoryClickEvent e) {
+                    if (!super.ClickCheck(e)) {
+                        return;
+                    }
+                    e.setCancelled(true);
+                }
+
+                @EventHandler
+                public void onClose(InventoryCloseEvent e) {
+                    super.closeCheck(e);
+                }
+            });
+            return inv;
+        }
+    }
+
+    private InventoryAPI getListupInv(Player p,InventoryAPI invs,String name){
+        InventoryAPI inv = get6_9Inv(p,invs,name);
         ItemStack wall = inv.createUnbitem(" ",new String[]{}, Material.BLACK_STAINED_GLASS_PANE,0,false);
         ItemStack back = inv.createUnbitem("§f§l§o前のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
         ItemStack walk = inv.createUnbitem("§f§l§o次のページへ",new String[]{}, Material.WHITE_STAINED_GLASS_PANE,0,false);
@@ -89,7 +125,7 @@ public class MSPCreator implements Listener, CommandExecutor {
         inv.setItems(new int[]{52,53},walk);
         inv.setItem(49,inv.createUnbitem("§c§l戻る",new String[]{"§e前のページに戻ります。"},
                 Material.DARK_OAK_DOOR,0,false));
-        invPat.putInv("list",inv);
+        return inv;
     }
 
 
@@ -136,17 +172,8 @@ public class MSPCreator implements Listener, CommandExecutor {
 
     public void openGUI(Player p,InventoryAPI inv,String invname,String[] args) {
 
-        if(inv!=null){
-            inv.regenerateID();
-            inv.allunregistRunnable();
-            p.closeInventory();
-        }
-
         if (invname.equalsIgnoreCase("main")) {
-            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l管理画面 §9§l―メイン―", "3_9");
-            if(inv==null){
-                inv = invPat.copyInv("3_9",MagicSpellBook.prefix + "§5§l管理画面 §9§l―メイン―");
-            }
+            inv = get3_9Inv(p, inv, MagicSpellBook.prefix + "§5§l管理画面 §9§l―メイン―");
             inv.setItem(11, inv.createUnbitem("§a§l新規作成", new String[]{"§e一から魔法パターンを作成します。"},
                     Material.WRITABLE_BOOK, 0, false));
             inv.addOriginalListing(new InvListener(plugin, inv) {
@@ -209,10 +236,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             inv.openInv(p);
         } else if (invname.equalsIgnoreCase("editmain")) {
             String id = args[0];
-            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix+"§5§l編集画面 §9§l―"+id+"―", "3_9");
-            if(inv==null){
-                inv = invPat.copyInv("3_9",MagicSpellBook.prefix+"§5§l編集画面 §9§l―"+id+"―");
-            }
+            inv = get3_9Inv(p, inv, MagicSpellBook.prefix+"§5§l編集画面 §9§l―"+id+"―");
             if(!MagicSpellBook.data.fileList.containsKey(id)){
                 return;
             }
@@ -426,10 +450,7 @@ public class MSPCreator implements Listener, CommandExecutor {
         } else if (invname.equalsIgnoreCase("editlist")) {
             int page = Integer.parseInt(args[0]);
 
-            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l管理画面 §9Page:" + page, "list");
-            if(inv==null){
-                inv = invPat.copyInv("list",MagicSpellBook.prefix + "§5§l管理画面 §9Page:" + page);
-            }
+            inv = getListupInv(p, inv, MagicSpellBook.prefix + "§5§l管理画面 §9Page:" + page);
             inv.addOriginalListing(new InvListener(plugin, inv) {
                 @EventHandler
                 public void onClick(InventoryClickEvent e) {
@@ -514,10 +535,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             inv.openInv(p);
         } else if (invname.equalsIgnoreCase("editexp")) {
             String id = args[0];
-            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l経験値設定画面", "3_9");
-            if(inv==null){
-                inv = invPat.copyInv("3_9",MagicSpellBook.prefix + "§5§l経験値設定画面");
-            }
+            inv = get3_9Inv(p, inv, MagicSpellBook.prefix + "§5§l経験値設定画面");
             SpellFile sp = MagicSpellBook.data.fileList.get(id);
             inv.setItem(12, inv.createUnbitem("§2§l必要経験値レベル設定",
                     new String[]{"§c起動時に必要な経験値レベルです！", "§c※消費経験値レベルより下にはセットできません", "§e通常/シフトクリックで数値をセット",
@@ -646,7 +664,7 @@ public class MSPCreator implements Listener, CommandExecutor {
         } else if (invname.equalsIgnoreCase("editreq")) {
             String id = args[0];
             int page = Integer.parseInt(args[1]);
-            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l必要アイテム管理 §9Page:" + page, "list");
+            inv = getListupInv(p, inv, MagicSpellBook.prefix + "§5§l必要アイテム管理 §9Page:" + page);
             if (!MagicSpellBook.data.fileList.containsKey(id)) {
                 return;
             }
@@ -767,10 +785,7 @@ public class MSPCreator implements Listener, CommandExecutor {
         } else if (invname.equalsIgnoreCase("editres")) {
             String id = args[0];
             int page = Integer.parseInt(args[1]);
-            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix + "§5§l報酬アイテム管理 §9Page:" + page, "list");
-            if(inv==null){
-                inv = invPat.copyInv("list",MagicSpellBook.prefix + "§5§l報酬アイテム管理 §9Page:" + page);
-            }
+            inv = getListupInv(p, inv, MagicSpellBook.prefix + "§5§l報酬アイテム管理 §9Page:" + page);
             if (!MagicSpellBook.data.fileList.containsKey(id)) {
                 return;
             }
@@ -907,10 +922,7 @@ public class MSPCreator implements Listener, CommandExecutor {
             }
             inv.openInv(p);
         } else if (invname.equalsIgnoreCase("confirm")) {
-            inv = invPat.overWriteInv(p, inv, MagicSpellBook.prefix+"§5§l確認画面", "3_9");
-            if(inv==null){
-                inv = invPat.copyInv("3_9",MagicSpellBook.prefix+"§5§l確認画面");
-            }
+            inv = get3_9Inv(p, inv, MagicSpellBook.prefix+"§5§l確認画面");
             String id = args[0];
             String type = args[1];
             if(type.equalsIgnoreCase("delete")){
