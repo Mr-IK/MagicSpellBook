@@ -118,7 +118,7 @@ public class MSPData implements Listener {
             for(Player as : Bukkit.getOnlinePlayers()){
                 as.playSound(mgsPlayers.get(p.getUniqueId()), Sound.BLOCK_ENCHANTMENT_TABLE_USE,2.0f,0.5f);
             }
-            mgsPlayers.get(p.getUniqueId()).getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE,mgsPlayers.get(p.getUniqueId()),50);
+            mgsPlayers.get(p.getUniqueId()).getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE,mgsPlayers.get(p.getUniqueId()).add(0.5,0.7,0.5),50);
             p.sendActionBar("§a§l§o準備完了。右クリックして魔法を起動してください――");
             stats.pushPhase();
         }
