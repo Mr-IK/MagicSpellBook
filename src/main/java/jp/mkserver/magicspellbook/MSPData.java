@@ -192,7 +192,7 @@ public class MSPData implements Listener {
                 for(Player as : Bukkit.getOnlinePlayers()){
                     as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,0.5f);
                 }
-                block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation().add(0.5,0.7,0.5),80);
+                block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation().add(0.5,0.7,0.5),40);
                 openMagicInv(p,mgs);
                 return;
             //フェーズ2: 実行
@@ -229,6 +229,9 @@ public class MSPData implements Listener {
                     return;
                 }
                 mgs.chargeExp(true);
+                block.getWorld().spawnParticle(Particle.NAUTILUS,block.getLocation().add(0.5,0.7,0.5),80);
+                block.getWorld().spawnParticle(Particle.TOTEM,block.getLocation().add(0.5,0.7,0.5),10);
+                showMagicCircleWorld(block.getWorld(),block.getLocation().add(0.5,0.7,0.5),2.0,Particle.SPELL_WITCH);
                 //2秒待つ
                 new BukkitRunnable() {
                     @Override
@@ -239,7 +242,7 @@ public class MSPData implements Listener {
                         for(Player as : Bukkit.getOnlinePlayers()){
                             as.playSound(block.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE,2.0f,1.5f);
                         }
-                        block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation().add(0.5,0.7,0.5),50);
+                        block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation().add(0.5,0.7,0.5),80);
                         p.sendActionBar("§a§l§o術式の起動に成功。");
                         if(unDamesi(100,file.getBreakC())){
                             p.sendActionBar("§c§l§o術式の反動で魔術本が破損してしまったようだ。");
@@ -272,7 +275,7 @@ public class MSPData implements Listener {
             for(Player as : Bukkit.getOnlinePlayers()){
                 as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,0.5f);
             }
-            block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation().add(0.5,0.7,0.5),80);
+            block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation().add(0.5,0.7,0.5),40);
             openMagicInv(p,mgs);
         }
     }
@@ -323,5 +326,29 @@ public class MSPData implements Listener {
         int aa = rnd.nextInt(max)+1;//1~100
         ///aaa=10の場合10分の一
         return aaa >= aa;
+    }
+
+    public List<Location> getCircle(Location center, double radius, int amount)
+    {
+        World world = center.getWorld();
+        double increment = (2 * Math.PI) / amount;
+        ArrayList<Location> locations = new ArrayList<Location>();
+        for(int i = 0;i < amount; i++)
+        {
+            double angle = i * increment;
+            double x = center.getX() + (radius * Math.cos(angle));
+            double z = center.getZ() + (radius * Math.sin(angle));
+            locations.add(new Location(world, x, center.getY(), z));
+        }
+        return locations;
+    }
+
+    // mukiが0の場合は横に広がる(X軸に広がる) 1の場合はY、2はZに広がる
+    public void showMagicCircleWorld(World world,Location loc,double size,Particle part){
+
+        List<Location> circl = getCircle(loc,size,(int)size*10);
+        for(Location locs : circl){
+            world.spawnParticle(part,locs,0,0,1,0);
+        }
     }
 }
