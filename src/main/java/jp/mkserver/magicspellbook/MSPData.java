@@ -192,7 +192,7 @@ public class MSPData implements Listener {
                 for(Player as : Bukkit.getOnlinePlayers()){
                     as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,0.5f);
                 }
-                block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),80);
+                block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation().add(0.5,0.7,0.5),80);
                 openMagicInv(p,mgs);
                 return;
             //フェーズ2: 実行
@@ -201,7 +201,7 @@ public class MSPData implements Listener {
                     for(Player as : Bukkit.getOnlinePlayers()){
                         as.playSound(block.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,2.0f,0.5f);
                     }
-                    block.getWorld().spawnParticle(Particle.SPELL_WITCH,block.getLocation(),20);
+                    block.getWorld().spawnParticle(Particle.SPELL_WITCH,block.getLocation().add(0.5,0.7,0.5),20);
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
                     if(unDamesi(100,file.getSbreakC())){
@@ -217,7 +217,7 @@ public class MSPData implements Listener {
                     for(Player as : Bukkit.getOnlinePlayers()){
                         as.playSound(block.getLocation(), Sound.ENTITY_GENERIC_EXPLODE,2.0f,0.5f);
                     }
-                    block.getWorld().spawnParticle(Particle.SMOKE_LARGE,block.getLocation(),20);
+                    block.getWorld().spawnParticle(Particle.SMOKE_LARGE,block.getLocation().add(0.5,0.7,0.5),20);
                     p.sendActionBar("§c§l§oこの術式を起動するのには素材不足です。アイテムを返却します――");
                     mgs.releaseItem();
                     removeMagic(block.getLocation(),p);
@@ -239,7 +239,7 @@ public class MSPData implements Listener {
                         for(Player as : Bukkit.getOnlinePlayers()){
                             as.playSound(block.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE,2.0f,1.5f);
                         }
-                        block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),50);
+                        block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation().add(0.5,0.7,0.5),50);
                         p.sendActionBar("§a§l§o術式の起動に成功。");
                         if(unDamesi(100,file.getBreakC())){
                             p.sendActionBar("§c§l§o術式の反動で魔術本が破損してしまったようだ。");
@@ -272,7 +272,7 @@ public class MSPData implements Listener {
             for(Player as : Bukkit.getOnlinePlayers()){
                 as.playSound(block.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN,2.0f,0.5f);
             }
-            block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation(),80);
+            block.getWorld().spawnParticle(Particle.PORTAL,block.getLocation().add(0.5,0.7,0.5),80);
             openMagicInv(p,mgs);
         }
     }
