@@ -16,6 +16,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -228,20 +229,25 @@ public class MSPData implements Listener {
                     return;
                 }
                 mgs.chargeExp(true);
-                safeGiveItem(p,mgs.getSpell().resultGacha());
-                mgs.releaseItem();
-                removeMagic(block.getLocation(),p);
-                for(Player as : Bukkit.getOnlinePlayers()){
-                    as.playSound(block.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE,2.0f,1.5f);
-                }
-                block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),50);
-                p.sendActionBar("§a§l§o術式の起動に成功。");
-                if(unDamesi(100,file.getBreakC())){
-                    p.sendActionBar("§c§l§o術式の反動で魔術本が破損してしまったようだ。");
-                    lec.getInventory().setItem(0,new ItemStack(Material.AIR));
-                    p.playSound(block.getLocation(), Sound.ENTITY_ITEM_BREAK,2.0f,0.8f);
-                }
-                return;
+                //2秒待つ
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        safeGiveItem(p,mgs.getSpell().resultGacha());
+                        mgs.releaseItem();
+                        removeMagic(block.getLocation(),p);
+                        for(Player as : Bukkit.getOnlinePlayers()){
+                            as.playSound(block.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE,2.0f,1.5f);
+                        }
+                        block.getWorld().spawnParticle(Particle.END_ROD,block.getLocation(),50);
+                        p.sendActionBar("§a§l§o術式の起動に成功。");
+                        if(unDamesi(100,file.getBreakC())){
+                            p.sendActionBar("§c§l§o術式の反動で魔術本が破損してしまったようだ。");
+                            lec.getInventory().setItem(0,new ItemStack(Material.AIR));
+                            p.playSound(block.getLocation(), Sound.ENTITY_ITEM_BREAK,2.0f,0.8f);
+                        }
+                    }
+                }.runTaskLaterAsynchronously(plugin,40);
             }
 
         //マジックステータス内にブロックの処理は確認できなかった(新しく開始する)

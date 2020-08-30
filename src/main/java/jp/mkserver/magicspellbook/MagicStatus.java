@@ -1,12 +1,19 @@
 package jp.mkserver.magicspellbook;
 
+import jp.mkserver.magicspellbook.util.ExpManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static jp.mkserver.magicspellbook.MagicSpellBook.plugin;
 import static jp.mkserver.magicspellbook.MagicSpellBook.safeGiveItem;
 
 public class MagicStatus {
@@ -88,14 +95,34 @@ public class MagicStatus {
     }
 
     public boolean chargeExp(boolean execute) {
-        if(Bukkit.getPlayer(uuid)!=null) {
+        Player p = Bukkit.getPlayer(uuid);
+        if(p!=null) {
             int reqExp = spell.getRequiredExp();
-            int nowLv = Bukkit.getPlayer(uuid).getLevel();
+            int nowLv = p.getLevel();
             if(nowLv<reqExp){
                 return false;
             }
             if(execute){
-                Bukkit.getPlayer(uuid).setLevel(nowLv- spell.getTakeExp());
+                int takexp = calcTakeExp(p,spell.getTakeExp());
+                int ta10 = takexp/20;
+                int tt = takexp%20;
+                new BukkitRunnable() {
+                    int i = 0;
+                    @Override
+                    public void run() {
+                        if(i>=20){
+                            cancel();
+                            return;
+                        }
+                        p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,0.5f,0.8f);
+                        if(i==0){
+                            ExpManager.setTotalExperience(p,ExpManager.getTotalExperience(p) - (ta10+tt));
+                        }else {
+                            ExpManager.setTotalExperience(p, ExpManager.getTotalExperience(p) - ta10);
+                        }
+                        i++;
+                    }
+                }.runTaskTimerAsynchronously(plugin,0,2);
             }
             return true;
         }else{
@@ -103,6 +130,16 @@ public class MagicStatus {
         }
     }
 
+    private int calcTakeExp(Player p,int takeLv){
+        int nowLv = p.getLevel();
+        int goLv = nowLv-takeLv;
+        int takeExp = 0;
+        for(int i = 0;i<takeLv;i++){
+            int r = ExpManager.getExpAtLevel(goLv+i);
+            takeExp = (takeExp+r);
+        }
+        return takeExp;
+    }
 
     public void pushPhase(){
         phase++;
