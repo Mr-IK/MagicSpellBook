@@ -86,15 +86,15 @@ public class MSPData implements Listener {
             if(e.getSlot()>=27&&e.getSlot()<=29) {
                 p.closeInventory();
             }else if(e.getSlot()>=30&&e.getSlot()<=32){
+                MagicStatus stats = mgStats.get(mgsPlayers.get(p.getUniqueId()));
+                stats.pushPhase();
+                p.closeInventory();
+            }else if(e.getSlot()>=33&&e.getSlot()<=35){
                 MagicStatus mgs = mgStats.get(mgsPlayers.get(p.getUniqueId()));
                 p.closeInventory();
                 mgs.releaseItem();
                 removeMagic(mgsPlayers.get(p.getUniqueId()),p);
                 p.sendActionBar("§c§l§o術式がキャンセルされました。アイテムを返却します――");
-            }else if(e.getSlot()>=33&&e.getSlot()<=35){
-                MagicStatus stats = mgStats.get(mgsPlayers.get(p.getUniqueId()));
-                stats.pushPhase();
-                p.closeInventory();
             }
         }
     }
@@ -285,12 +285,12 @@ public class MSPData implements Listener {
         inv.setItem(27,close);
         inv.setItem(28,close);
         inv.setItem(29,close);
-        inv.setItem(30,cancel);
-        inv.setItem(31,cancel);
-        inv.setItem(32,cancel);
-        inv.setItem(33,start);
-        inv.setItem(34,start);
-        inv.setItem(35,start);
+        inv.setItem(30,start);
+        inv.setItem(31,start);
+        inv.setItem(32,start);
+        inv.setItem(33,cancel);
+        inv.setItem(34,cancel);
+        inv.setItem(35,cancel);
 
         for(ItemStack item:mgs.getInputedItem()){
             inv.addItem(item);
